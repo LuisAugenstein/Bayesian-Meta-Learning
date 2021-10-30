@@ -1,0 +1,153 @@
+\documentclass{article}
+\usepackage[english]{babel}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\DeclareMathOperator*{\argmin}{argmin}
+
+\begin{document}
+	\section{Information from the video}
+	\paragraph{Seminar}
+	\begin{enumerate}
+		\item Understand the Bayesian formulation of meta-learning
+		\item Understand Bayesian extensions of MAML (Model-Agnostic Meta-Learning) [1,2,3]
+	\end{enumerate}
+	\paragraph{Practicum}
+	\begin{enumerate}
+		\item implement Bayesian meta-learning algorithms
+		\item apply to various benchmark tasks
+		\item compare performance
+	\end{enumerate}
+	\paragraph{Paper}
+	\begin{enumerate}
+		\item Finn et al., "Model-agnostic Meta-Learning for Fast Adaption of Neural Networks"
+		\item Finn et al., "Probabilistic Model-Agnostic Meta-Learning"
+		\item Kim et al., "Bayesian Meta-Learning"
+		\item Yin et al., "Meta-learning without Memorization"
+	\end{enumerate}
+
+	\section{Model-agnostic Meta-Learning for Fast Adaption of Neural Networks}
+	\subsection{Abstract and Introduction}
+	\paragraph{Goal of Meta-Learning}
+	\begin{itemize}
+		\item The goal of meta-learning is to train a model on a variety of learning tasks, such that it can solve new learning tasks using only a small number of training samples.
+	\end{itemize}
+	\paragraph{Advantage Compared to Previous Methods}
+	\begin{itemize}
+		\item  does not expand the number of learned parameters nor places constraints on the model architecture, unlike prior methods.
+		\item compares favorably to state-of-the-art one-shot learning methods designed specifically for supervised classification while using fewer parameters, but can also be readily applied to regression and can accelerate reinforcement learning in the presence of task variability, substantially outperforming direct pretraining as initialization.
+	\end{itemize}
+
+	\subsubsection{REINFORCE}
+	\begin{enumerate}
+		\item Initialize random $\theta$ and obtain $f_{\theta}(\boldsymbol{a}_t | \boldsymbol{x}_t)$
+		\item Sample $K$ trajectories $\tau_j = \{(x_0, a_0), ..., (x_T,a_T)\}_j \sim q_{\theta}(\boldsymbol{\tau})$
+		\begin{align}
+			q_{\theta}(\boldsymbol{\tau}) = q(\boldsymbol{x}_1)\prod_{t=1}^{H} q(\boldsymbol{x}_{t+1} \vert \boldsymbol{x}_t, \boldsymbol{a}_t) f_{\theta}(\boldsymbol{a}_t \vert \boldsymbol{x}_t).
+		\end{align}
+		\item Approximate expected return $J(\theta)$ as average episode reward
+		\begin{align}
+			J(\theta) = \dfrac{1}{K} \sum_{j=1}^{K} \sum_{t=1}^{H} \gamma^t r(x_{j,t}, a_{j,t}).
+		\end{align}
+		\item Update parameters $\theta$ with gradient ascent
+		\begin{align}
+			\theta \leftarrow \theta + \alpha \nabla J(\theta)
+		\end{align}
+		where $\nabla J(\theta)$ is approximated with the log ratio trick
+		\begin{align}
+			\nabla J(\theta) \approx \dfrac{1}{K} \sum_{j=1}^{K} \left( \sum_{t=1}^{H} \nabla_{\theta} \log f_{\theta}(a_{j,t} \vert x_{j,t}) \right) \left(\sum_{t=1}^{H} \gamma^t r(x_{j,t}, a_{j,t})\right).
+		\end{align}
+		This involves evaluation of and gradient of the neural network
+	\end{enumerate} 
+
+	\subsubsection{Loss function}
+	In the algorithm: 
+	\begin{align}
+		\theta \leftarrow \theta - \alpha \nabla_{\theta} \mathcal{L}(f_{\theta})
+	\end{align}
+	For REINFORCE case we would have:
+	\begin{align}
+		\mathcal{L}(f_\theta) = -J(\theta)
+	\end{align}
+	Loss function equals negative return. Input parameter $f_{\theta}$ or $\theta$ implicitly says we need to use $f_{\theta}$ to sample trajectories $\tau$ from this policy and use the samples to calculate the loss/return 
+		
+	\subsection{Meta-Learning Problem Setup Theory}
+	\begin{tabular}{c l}
+		$\mathcal{T} = \{\mathcal{L}(f_{\theta}), q(\boldsymbol{x}_1), q(\boldsymbol{x}_{t+1} \vert \boldsymbol{x}_t, \boldsymbol{a}_t), H\} \sim p(\mathcal{T})$ & Task and Task distribution \\
+		$\boldsymbol{x}$ & State/Observation \\
+		$\boldsymbol{a}$ & Action/Output \\
+		$H$ & Episode Length \\
+		$q(\boldsymbol{x_1})$ and $q(\boldsymbol{x}_{t+1} \vert \boldsymbol{x}_t, \boldsymbol{a}_t)$ & Initial State Distribution and Transition Distribution \\
+		$\mathcal{L}(\boldsymbol{x}_1, \boldsymbol{a}_1, ..., \boldsymbol{x}_H, \boldsymbol{a}_H)$ or $\mathcal{L}(f_{\theta}) \rightarrow \mathbb{R}$ & Loss Function \\
+		$f_{\theta}(\boldsymbol{a}_t \vert \boldsymbol{x}_t)$ & Parameterized Model/Policy 
+	\end{tabular}
+\paragraph{Meta-Training} (optimize $\theta$) 
+	\begin{enumerate}
+		\item Start with random parameters $\theta$
+		\item Sample $n_{train}$ tasks $\mathcal{T}_i \sim p(\mathcal{T})$
+		\item Draw $K$ samples each of length $H$ $\{(x_1, a_1, ..., x_H, a_H)\}_{j=1...K}$ from $q_i(\boldsymbol{x}_{t+1} \vert \boldsymbol{x}_t, \boldsymbol{a}_t)$ where $\boldsymbol{a}_t \sim f_{\theta}( \cdot \vert \boldsymbol{x_t})$
+		\item Adapt $f_{\theta}$ to $f_{\theta_i}$ by minimizing the loss function $\mathcal{L}_i$
+		\begin{align}
+			\theta_i = \argmin_{\theta} \sum_{j=1}^{K} \mathcal{L}_i((x_1, a_1, ..., x_H, a_H)_j).
+		\end{align}
+		Also sample more samples of length $H$ $\{(x_1, a_1, ..., x_H, a_H)\}_{j=1...L}$ for testing where $\boldsymbol{a}_t \sim f_{\theta_i}( \cdot \vert \boldsymbol{x_t})$.\\
+		Do steps 3 and 4 with all tasks $\mathcal{T}_i$.
+		\item Use test set samples from $f_{\theta_1}, ..., f_{\theta_{n_{train}}}$ to optimize $\theta$
+		\begin{align}
+			\theta_{new} = \argmin_{\theta} \sum_{i=1}^{n_{train}} \sum_{j=1}^{L} \mathcal{L}_i((x_1, a_1, ..., x_H, a_H)_j).
+		\end{align}
+	\end{enumerate}
+\paragraph{Meta-Testing} (check Meta-Performance ,i.e., if $\theta_{new}$ works on new tasks)
+	\begin{enumerate}
+		\item Sample $n_{test}$ new tasks $\mathcal{T}_i \sim p(\mathcal{T})$
+		\item Draw a Support Set with $K$ samples $\mathcal{D}_i^{S} = \{(x_1, a_1, ..., x_H, a_H)\}_{j=1...K}$ from $q_i(\boldsymbol{x}_{t+1} \vert \boldsymbol{x}_t, \boldsymbol{a}_t)$ where $\boldsymbol{a}_t \sim f_{\theta_{new}}( \cdot \vert \boldsymbol{x_t})$
+		\item Adapt $f_{\theta_{new}}$ to $f_{\theta_i}$ by minimizing the loss function $\mathcal{L}_i$
+		\begin{align}
+			\theta_i = \argmin_{\theta} \sum_{j=1}^{K} \mathcal{L}_i((x_1, a_1, ..., x_H, a_H)_j).
+		\end{align}
+		Also sample more samples of length $H$ (Query Set) $\mathcal{D}_i^{Q}=\{(x_1, a_1, ..., x_H, a_H)\}_{j=1...L}$ for testing where $\boldsymbol{a}_t \sim f_{\theta_i}( \cdot \vert \boldsymbol{x_t})$.\\
+		Do steps 3 and 4 with all testing tasks $\mathcal{T}_i$.
+		\item Use test set samples from $f_{\theta_1}, ..., f_{\theta_{n_{train}}}$ to evaluate the Meta-Loss $\mathcal{L}$
+		\begin{align}
+			Loss = \sum_{i=1}^{n_{test}} \sum_{j=1}^{L} \mathcal{L}_i((x_1, a_1, ..., x_H, a_H)_j).
+		\end{align}
+	\end{enumerate}
+\paragraph{Neural Network Evaluations Supervised Learning (H=1)}
+	\begin{itemize}
+		\item Training 3: $K \cdot n_{train}$  (we evaluate $f_{\theta}$ on K inputs for each Task)
+		\item Training 4:  $L \cdot n_{train}$ (we evaluate each $f_{\theta_i}$ on L test samples)
+		\item Testing 2: $K \cdot n_{test}$ 
+		\item Testing 3: $L \cdot n_{test}$
+	\end{itemize}
+
+\subsection{MAML Objective}
+\begin{align*}
+	\theta_i &= \argmin_{\theta} \mathcal{L}(\theta, \mathcal{D}_i^{S})\\
+	\theta^* &= \argmin_{\theta} \sum_{\mathcal{T}_i \sim p(\mathcal{T})} \mathcal{L}(\theta_i, \mathcal{D}_i^{Q})
+\end{align*}
+
+\subsection{Model-Agnostic Meta-Learning (MAML) Algorithm}
+\paragraph{Meta-Training} (optimize $\theta$) 
+\begin{enumerate}
+	\item Start with random parameters $\theta$
+	\item Sample $n_{train}$ tasks $\mathcal{T}_i \sim p(\mathcal{T})$
+	\item Draw $K$ samples each of length $H$ $\{(x_1, a_1, ..., x_H, a_H)\}_{j=1...K}$ from $q_i(\boldsymbol{x}_{t+1} \vert \boldsymbol{x}_t, \boldsymbol{a}_t)$ where $\boldsymbol{a}_t \sim f_{\theta}( \cdot \vert \boldsymbol{x_t})$
+	\item Adapt $f_{\theta_{new}}$ to $f_{\theta_i}$ by minimizing the loss function $\mathcal{L}_i$
+	\begin{align}
+		\theta_i \leftarrow \theta - \alpha \dfrac{1}{K} \sum_{j=1}^{K} \nabla_{\theta} \mathcal{L}_i((x_1,a_1,...,x_H,a_H)_j)
+	\end{align}
+	Also sample more samples of length $H$ $\{(x_1, a_1, ..., x_H, a_H)\}_{j=1...L}$ for testing where $\boldsymbol{a}_t \sim f_{\theta_i}( \cdot \vert \boldsymbol{x_t})$.\\
+	Do steps 3 and 4 with all testing tasks $\mathcal{T}_i$.
+	\item  Use test set samples from $f_{\theta_1}, ..., f_{\theta_{n_{train}}}$ to optimize $\theta$
+	\begin{align}
+		\theta \leftarrow \theta - \beta \sum_{i=1}^{n_{train}} \sum_{j=1}^{L} \nabla_{\theta} \mathcal{L}_i((x_1,a_1,...,x_H,a_H)_j)
+	\end{align}
+\end{enumerate}
+\paragraph{Meta-Testing} (check Meta-Performance ,i.e., if $\theta$ works on new tasks)
+\begin{enumerate}
+	\item Sample $n_{test}$ new tasks $\mathcal{T}_i \sim p(\mathcal{T})$
+	\item Draw K-Samples $(\boldsymbol{x}_1, \boldsymbol{a}_1, ..., \boldsymbol{x}_K, \boldsymbol{a}_K)$ from $q_i(\boldsymbol{x}_{t+1} \vert \boldsymbol{x}_t, \boldsymbol{a}_t)$ where $\boldsymbol{a}_t \sim f_{\theta}( \cdot \vert \boldsymbol{x_t})$
+	\item train $f_\theta$ to optimize Loss $\mathcal{L}$ and obtain $f_{\theta_i}$
+	\item Sample more samples $(\boldsymbol{x}_{K+1}, \boldsymbol{a}_{K+1}, ...)$ for testing on $\mathcal{L}$ and obtain loss. 
+\end{enumerate}
+	
+\end{document}
