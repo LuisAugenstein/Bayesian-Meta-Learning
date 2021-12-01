@@ -1,0 +1,143 @@
+\documentclass{article}
+\usepackage[english]{babel}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{algorithm}
+\usepackage{algorithmic}
+\usepackage{color}
+\DeclareMathOperator*{\argmin}{argmin}
+\DeclareMathOperator*{\argmax}{argmax}
+\definecolor{bostonuniversityred}{rgb}{0.8, 0.0, 0.0}
+
+\begin{document}
+	\section{Step from Eq.2 to Eq.3}
+	\begin{align}
+		p(X^{c} \vert \theta) = \prod_{j} \int p( x_{j_1},..., x_{j_N} \vert \phi_j) \: p(\phi_j \vert \theta) \: \text{d} \phi_j \\
+		p(X^{t} \vert \theta) = \prod_{j} \int p( x_{j_{N+1}},..., x_{j_{N+M}} \vert \phi_j) \: p(\phi_j \vert \theta) \: \text{d} \phi_j
+	\end{align}
+	\begin{align}
+		- \text{log } p(X^{t} \vert \theta) &= \sum_j - \text{log } \int p( x_{j_{N+1}},..., x_{j_{N+M}} \vert \phi_j) \: p(\phi_j \vert \theta) \: \text{d} \phi_j \\
+		&\approx \sum_j - \text{log } \int p( x_{j_{N+1}},..., x_{j_{N+M}} \vert \phi_j) \: \delta(\phi_j - \hat{\phi}_j) \: \text{d} \phi_j \\
+		&= \sum_j - \text{log } p( x_{j_{N+1}},..., x_{j_{N+M}} \vert \hat{\phi}_j) 
+	\end{align}
+	
+	\section{Introduction}
+	\paragraph{Cross Entropy Loss for Standard Classification}
+	\begin{itemize}
+		\item network outputs a probability vector $f_{\theta}(\underline{x}) \in [0,1]^{d}$ where we have $d$ classes. This can be interpreted as $p_{\theta}(c \vert {\underline{x}}) = f_{\theta}(\underline{x})[c]$ for $c \in \{1, ..., d\}$
+		\item target $\underline{c}_i \in \{0,1\}^d$ is a one-hot encoded vector 
+		\item cross-entropy loss for dataset $\mathcal{D} = \{(\underline{x}_i, \underline{c}_i)\}_{i=1...N}$  
+		\begin{align*}
+			\mathcal{L}(\theta, \mathcal{D}) = - \sum_{i=1}^{N} \underline{c}_i^T \text{log}(f_{\theta}(\underline{x}_i)) = - \sum_{i=1}^{N} \text{log } p_{\theta}(c_i \vert \underline{x}_i)
+		\end{align*}
+	\end{itemize}
+
+	
+	\section{Meta-Learning Formulation}
+	
+	\subsection{MAML}
+\begin{algorithm}
+	\caption{MAML}
+	\begin{algorithmic}  
+		\STATE Randomly initialize $\theta$
+		\WHILE{not done}
+		\FOR{task $\mathcal{T}_i \sim p(\mathcal{T})$}
+			\STATE Draw support set $\mathcal{D}_i^{S} = \{ (\boldsymbol{x}_j, \boldsymbol{y}_j)\}_{j=1...K}$ from $\mathcal{T}_i$
+			\STATE Adapt parameters $\theta_i = \theta - \alpha \nabla_{\theta} \mathcal{L}_i(\theta, \mathcal{D}_i^{S}) $
+			\STATE Draw test samples  $\mathcal{D}_i^{Q} = \{(\boldsymbol{x}_j, \boldsymbol{y}_j)\}$ from $\mathcal{T}_i$
+		\ENDFOR
+		\STATE Meta-Update: $\theta \leftarrow \theta - \beta \nabla_{\theta} \sum_{i} \mathcal{L}_i(\theta_i, \mathcal{D}_{i}^{Q})$
+		\ENDWHILE
+	\end{algorithmic}
+	\paragraph{Meta-Update:}
+	\begin{align*}
+		\dfrac{ \partial \mathcal{L}}{\partial \theta} = \dfrac{\partial \mathcal{L}}{\partial \theta_i} \dfrac{ \partial \theta_i}{\partial \theta} = \nabla_{\theta_i} \mathcal{L}(\theta_i, \mathcal{D}_i^{Q}) (I - \alpha \nabla_{\theta} \nabla_{\theta} \mathcal{L}(\theta, \mathcal{D}_i^S))
+	\end{align*}
+\end{algorithm}
+	
+	\subsection{Hierarchical Bayes Inference}
+	this is theory. $p$ is not our network but some unknown density we want to optimize $\theta^* = \argmax_{\theta} \: p(\mathcal{D} \vert \theta)$. where $\mathcal{D}$ includes the observed data of all tasks.
+	\begin{align}
+		p(\mathcal{D} \vert \theta) = \prod_{i} \int p(\mathcal{D}_i \vert \phi_i) \: p(\phi_i \vert \theta) \: \text{d} \phi_i
+	\end{align}
+
+	\section{Linking MAML and Hierarchical Bayes}
+	The marginalization over $\phi_i$ is not tractable so we simply use a point estimate $\hat{\phi}_i$ for each task.
+	\begin{align}
+		\text{log } p(\mathcal{D} \vert \theta) \approx \sum_{i} \text{log } p(\mathcal{D}_i \vert \hat{\phi}_i)
+	\end{align}
+	For standard MAML we use $\hat{\phi}_i = \theta - \alpha \nabla_{\theta} \mathcal{L}(\theta, \mathcal{D}_i)$. 
+	(Skip rest of 3.1 and 3.2)
+	
+	\section{actual Algorithm to improve MAML}
+	
+	\subsection{Laplace Method of Integration}
+	For the advanced version we use Laplace approximation.
+	\begin{align}
+		\int p(\mathcal{D}_i \vert \phi_i) \: p(\phi_i \vert \theta) \: \text{d} \phi_i \approx p(\mathcal{D}_i \vert \phi_i^*) \: p(\phi_i^* \vert \theta) \: \dfrac{1}{\sqrt{\text{det}(\frac{1}{2 \pi} H_i)}}
+	\end{align}
+	where $\phi_i^*$ is is a mode (local maximum) of the integrand and $H_i = \nabla_{\phi_i^*}^2 \mathcal{L}(\phi_i^*, \mathcal{D}_i)$ is the Hessian matrix of the loss at $\phi_i^*$.
+	
+	\paragraph{Lightweight Laplace Approximation for Meta-Adaption} $\text{ }$
+	
+	\begin{algorithm}
+		\caption{LLAMA}
+		\begin{algorithmic}  
+			\STATE Randomly initialize $\theta$
+			\WHILE{not done}
+			\FOR{task $\mathcal{T}_i \sim p(\mathcal{T})$}
+			\STATE Draw support set $\mathcal{D}_i^{S} = \{ (\boldsymbol{x}_j, \boldsymbol{y}_j)\}_{j=1...K}$ from $\mathcal{T}_i$
+			\STATE Adapt parameters $\theta_i = \theta - \alpha \nabla_{\theta} \mathcal{L}_i(\theta, \mathcal{D}_i^{S}) $
+			\STATE \textcolor{bostonuniversityred}{estimate quadratic curvature $H_i = \nabla_{\theta_i}^2 \mathcal{L}_i(\theta_i, \mathcal{D}_i^{S})$}
+			\STATE Draw test samples  $\mathcal{D}_i^{Q} = \{(\boldsymbol{x}_j, \boldsymbol{y}_j)\}$ from $\mathcal{T}_i$
+			\ENDFOR
+			\STATE Meta-Update: $\theta \leftarrow \theta - \beta \nabla_{\theta} \sum_{i} \mathcal{L}_i(\theta_i, \mathcal{D}_{i}^{Q})$  \textcolor{bostonuniversityred}{$+ \eta \: \text{log det}(H_i)$}
+			\ENDWHILE
+		\end{algorithmic}
+		\paragraph{Production:}
+		\begin{algorithmic}
+			\FOR{new Tasks $\mathcal{T}_i \sim p(\mathcal{T})$}
+				\STATE calculate $\mathcal{D}_i^{S}$, $\theta_i$, $H_i$ as in meta-training
+				\STATE \textcolor{bostonuniversityred}{ draw $\theta_{sample} \sim \mathcal{N}(\theta_i, H_i^{-1})$}
+				\STATE use $f_{\theta_{sample}}$ for new production data
+			\ENDFOR
+		\end{algorithmic}
+	\end{algorithm}
+
+\section{Powerpoint}
+Conceptually we can view the problem of finding a good theta as finding the MLE estimate
+\begin{align}
+	\theta^* &= \argmax_{\theta} \: p(\mathcal{D} \vert \theta) \\ 
+	&= \argmax_{\theta} \: \prod_{i} \int p(\mathcal{D}_i \vert \phi_i) \: p(\phi_i \vert \theta) \: \text{d} \phi_i
+\end{align}
+where $\mathcal{D}$ includes the observed data of all tasks. We cannot compute this integrals. To make them tractable we employ a point estimate $\hat{\phi}_i$ which we obtain from MAML. $p(\phi_i \vert \theta)$ acts like a dirac impulse.
+\begin{align}
+	\theta^* = \argmin_{\theta}	- \text{log } p(\mathcal{D} \vert \theta) \approx \argmin_{\theta} - \sum_{i} \text{log } p(\mathcal{D}_i \vert \hat{\phi}_i)
+\end{align}
+So we are minimizing the cross entropy loss. 
+\paragraph{for classification} this is 
+\begin{align}
+ \mathcal{L}(\phi, \mathcal{D}) =  - \sum_{j} \text{log } f_{\phi}(c_j \vert x_j) = - \sum_{j} \text{log } p(c_j \vert x_j, \phi) = - \text{log } p(\mathcal{D} \vert \phi)
+\end{align}
+for a model $f_{\phi}$ dataset $\mathcal{D} = \{(x_j, c_j)\}_{j=1...N}$ where $c_j \in \{1,...,C\}$ for $C$ different classes. 
+\paragraph{For regression} this is
+\begin{align*}
+	\mathcal{L}(\phi, \mathcal{D}) = \sum_{j} (f_{\phi}(x_j) - y_j)^2 = \: ??? =  - \text{log } p(\mathcal{D} \vert \phi)
+\end{align*}
+where $y_j \in \mathbb{R}^d$
+\\ 
+Instead of only using a point estimate we also can use Laplace Approximation: \\
+\\
+\begin{tabular}{l l}
+	Point estimate: & $p(\mathcal{D} \vert \phi) \approx p(\mathcal{D}_i \vert \hat{\phi}_i)$ \\
+	Laplace Approximation: & $p(\mathcal{D} \vert \phi) \approx p(\mathcal{D}_i \vert \hat{\phi}_i) \: p(\hat{\phi}_i \vert \theta) \frac{1}{\sqrt{\text{det}(\frac{H_i}{2\pi})}}$ 
+\end{tabular} \\
+with Hessian $H_i = -\nabla_{\phi}^2 \text{log }p(\mathcal{D}_i \vert \phi)p(\phi \vert \theta) \vert_{\phi=\hat{\phi}_i}$
+\\ \\
+and the point estimate $\theta^*$ from MAML. \\
+We can sample $\theta \sim \mathcal{N}(\theta^*, H^{-1})$ where
+\begin{align}
+	H = \nabla_{\theta}^2 \: \mathcal{L}(\theta) \vert_{\theta = \theta^*}
+\end{align}
+
+\end{document}
