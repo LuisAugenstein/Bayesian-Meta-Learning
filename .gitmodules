@@ -1,3 +1,0 @@
-[submodule "code/few_shot_meta_learning"]
-	path = code/few_shot_meta_learning
-	url = https://github.com/cnguyen10/few_shot_meta_learning.git
