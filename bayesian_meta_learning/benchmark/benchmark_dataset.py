@@ -13,10 +13,10 @@ class BenchmarkDataset(torch.utils.data.Dataset):
             self.tasks[i] = benchmark.get_task_by_index(i)
 
     def __len__(self) -> int:
-        return self.n_tasks
+        return 100000
 
     def __getitem__(self, index) -> typing.List[torch.Tensor]:
-        task = self.tasks[index]
+        task = self.tasks[index % self.n_tasks]
         x = torch.tensor(task.x, dtype=torch.float32).squeeze()
         y = torch.tensor(task.y, dtype=torch.float32).squeeze()
         return [x, y]
