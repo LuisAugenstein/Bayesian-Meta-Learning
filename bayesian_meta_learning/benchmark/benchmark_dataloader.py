@@ -1,7 +1,7 @@
 import torch
-from bayesian_meta_learning import BenchmarkDataset, SinusoidAffineBenchmark
+from bayesian_meta_learning.benchmark.benchmark_dataset import BenchmarkDataset
+from bayesian_meta_learning.benchmark.sinusoid_affine_benchmark import SinusoidAffineBenchmark
 from mtutils.mtutils import BM_DICT
-
 from metalearning_benchmarks.benchmarks.util import normalize_benchmark
 
 def create_benchmark_dataloaders(config: dict):

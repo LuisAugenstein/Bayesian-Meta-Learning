@@ -16,7 +16,7 @@
             "args": [
                 //possible algorithms (baseline, maml, platipus, bmaml)
                 "--algorithm", "maml",
-                "num_episodes_per_epoch", "2000"
+                "--num_episodes_per_epoch", "2000"
             ]
         },
         //SANITY CHECKS always only change the algorithm

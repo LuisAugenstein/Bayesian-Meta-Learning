@@ -4,7 +4,9 @@ import os
 import numpy as np
 import random
 
-import Baseline, visualizer, create_benchmark_dataloaders
+from bayesian_meta_learning import visualizer
+from bayesian_meta_learning.benchmark.benchmark_dataloader import create_benchmark_dataloaders
+from bayesian_meta_learning.algorithms import Baseline
 
 from few_shot_meta_learning.Maml import Maml
 from few_shot_meta_learning.Platipus import Platipus

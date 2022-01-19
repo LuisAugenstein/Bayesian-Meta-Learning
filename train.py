@@ -4,8 +4,8 @@ import torch
 import numpy as np
 import os
 import argparse
-from bayesian_meta_learning.runner import MainRunner
-import few_shot_meta_learning as fsml
+from bayesian_meta_learning.runner.MainRunner import MainRunner
+from few_shot_meta_learning._utils import train_val_split_regression
 
 # --------------------------------------------------
 # SETUP INPUT PARSER
@@ -73,7 +73,7 @@ def main():
                         help='Number of episodes used in testing')
     parser.add_argument("--resume_epoch", default=0,
                         help='0 means fresh training. >0 means training continues from a corresponding stored model.')
-    parser.add_argument('--logdir', default='/media/n10/Data/', type=str,
+    parser.add_argument('--logdir', default='saved_models', type=str,
                         help='Folder to store model and logs')
     parser.add_argument("--first_order", default=True, type=bool,
                         help="Should always be true for MAML basd algos")
@@ -94,7 +94,7 @@ def main():
 
     config['minibatch_print'] = np.lcm(config['minibatch'], 1000)
     config['loss_function'] = torch.nn.MSELoss()
-    config['train_val_split_function'] = fsml.train_val_split_regression
+    config['train_val_split_function'] = train_val_split_regression
 
     config['device'] = torch.device('cuda:0') if torch.cuda.is_available() \
         else torch.device('cpu')

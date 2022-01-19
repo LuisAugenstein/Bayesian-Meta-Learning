@@ -1,4 +1,3 @@
-from msilib import sequence
 from typing import Tuple
 import wandb
 import torch
@@ -6,7 +5,6 @@ import os
 import numpy as np
 import random
 import matplotlib.pyplot as plt
-from matplotlib import collections
 
 
 def plot_tasks_initially(caption, algo, task_dataloader, config):
