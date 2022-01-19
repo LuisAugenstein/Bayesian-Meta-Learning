@@ -74,7 +74,7 @@ def main():
                         help='Number of episodes used in testing')
     parser.add_argument("--resume_epoch", default=0,
                         help='0 means fresh training. >0 means training continues from a corresponding stored model.')
-    parser.add_argument('--logdir', default='.', type=str,
+    parser.add_argument('--logdir_base', default='.', type=str,
                         help='Folder to store model and logs')
     parser.add_argument("--first_order", default=True, type=bool,
                         help="Should always be true for MAML basd algos")
