@@ -1,0 +1,82 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "default parameters",
+            "type": "python",
+            "request": "launch",
+            "program": "train.py",
+            "console": "integratedTerminal",
+            "env": {
+                "PYTHONWARNINGS": "ignore"
+            },
+            "args": [
+                //possible algorithms (baseline, maml, platipus, bmaml)
+                "--algorithm", "maml",
+                "num_episodes_per_epoch", "2000"
+            ]
+        },
+        //SANITY CHECKS always only change the algorithm
+        {
+            "name": "Adaptation Test",
+            "type": "python",
+            "request": "launch",
+            "program": "train.py",
+            "console": "integratedTerminal",
+            "env": {
+                "PYTHONWARNINGS": "ignore"
+            },
+            "args": [
+                // changeable parameters
+                "--algorithm", "platipus", // 
+                "--num_inner_updates", "10000", // 0 for initial model, 10000 for many adaptations
+                "--num_models", "5",
+                "--minibatch", "1",
+                // don't change parameters below
+                "--k_shot", "80",
+                "--minibatch_validation", "0",
+                "--minibatch_test", "0",
+                "--num_epochs", "0",
+            ]
+        },
+        {
+            "name": "One Task Test",
+            "type": "python",
+            "request": "launch",
+            "program": "train.py",
+            "console": "integratedTerminal",
+            "env": {
+                "PYTHONWARNINGS": "ignore"
+            },
+            "args": [
+                "--algorithm", "maml",
+                "--minibatch", "1",
+                "--minibatch_validation", "0",
+                "--minibatch_test", "0",
+                "--num_epochs", "5000",
+            ],
+        },
+        // Quick Run for each algorithm to check if it throws errors
+        {
+            "name": "Quick Run",
+            "type": "python",
+            "request": "launch",
+            "program": "train.py",
+            "console": "integratedTerminal",
+            "env": {
+                "PYTHONWARNINGS": "ignore"
+            },
+            "args": [
+                "--algorithm", "maml",
+                "--minibatch", "2",
+                "--minibatch_validation", "1",
+                "--minibatch_test", "2",
+                "--num_epochs", "50",
+                "--epochs_to_store", "10"
+            ],
+        }
+    ]
+}
