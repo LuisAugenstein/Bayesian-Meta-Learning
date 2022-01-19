@@ -4,6 +4,7 @@ import torch
 import numpy as np
 import os
 import argparse
+import pathlib
 from bayesian_meta_learning.runner.MainRunner import MainRunner
 from few_shot_meta_learning._utils import train_val_split_regression
 
@@ -73,7 +74,7 @@ def main():
                         help='Number of episodes used in testing')
     parser.add_argument("--resume_epoch", default=0,
                         help='0 means fresh training. >0 means training continues from a corresponding stored model.')
-    parser.add_argument('--logdir', default='saved_models', type=str,
+    parser.add_argument('--logdir', default='.', type=str,
                         help='Folder to store model and logs')
     parser.add_argument("--first_order", default=True, type=bool,
                         help="Should always be true for MAML basd algos")
@@ -86,12 +87,6 @@ def main():
     for key in args.__dict__:
         config[key] = args.__dict__[key]
 
-    config['logdir'] = os.path.join(
-        config['logdir'], 'meta_learning', config['algorithm'], config['benchmark'])
-    if not os.path.exists(path=config['logdir']):
-        from pathlib import Path
-        Path(config['logdir']).mkdir(parents=True, exist_ok=True)
-
     config['minibatch_print'] = np.lcm(config['minibatch'], 1000)
     config['loss_function'] = torch.nn.MSELoss()
     config['train_val_split_function'] = train_val_split_regression
@@ -99,9 +94,27 @@ def main():
     config['device'] = torch.device('cuda:0') if torch.cuda.is_available() \
         else torch.device('cpu')
 
+    # create directory tree to store models and plots
+    create_save_models_directory(config) 
+
     # choose a Runner and start the run
     runner = MainRunner(config)
     runner.run()
+
+def create_save_models_directory(config: dict):
+    logdir = os.path.join(config['logdir_base'], 'saved_models',
+                          config['algorithm'].lower(),
+                          config['network_architecture'],
+                          config['benchmark'],
+                          f"{config['k_shot']}-shot",
+                          f"{config['num_models']}-models",
+                          f"{config['seed']}_{config['seed_offset']}_{config['seed_offset_test']}"
+                          )
+
+    config['logdir'] = os.path.join(logdir, 'models')
+    config['logdir_plots'] = os.path.join(logdir, 'plots')
+    pathlib.Path(config['logdir']).mkdir(parents=True, exist_ok=True)
+    pathlib.Path(config['logdir_plots']).mkdir(parents=True, exist_ok=True)
 
 
 if __name__ == "__main__":
