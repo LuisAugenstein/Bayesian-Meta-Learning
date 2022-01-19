@@ -1,2 +1,0 @@
-git+https://github.com/michaelvolpp/metalearning_benchmarks.git@master#egg=metalearning_benchmarks
-git+https://github.com/michaelvolpp/mtbnn.git@master#egg=mtbnn
