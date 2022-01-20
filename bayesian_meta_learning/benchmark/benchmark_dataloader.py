@@ -1,5 +1,5 @@
 from random import shuffle
-import torch
+from torch.utils.data.dataloader import DataLoader
 from bayesian_meta_learning.benchmark.benchmark_dataset import BenchmarkDataset
 from bayesian_meta_learning.benchmark.sinusoid_affine_benchmark import SinusoidAffineBenchmark
 from mtutils.mtutils import BM_DICT
@@ -7,9 +7,9 @@ from metalearning_benchmarks.benchmarks.util import normalize_benchmark
 
 def create_benchmark_dataloaders(config: dict):
     bm_meta, bm_val, bm_test = _create_benchmarks(config)
-    train_data_loader = torch.utils.data.DataLoader(BenchmarkDataset(bm_meta), shuffle=True)
-    val_data_loader = torch.utils.data.DataLoader(BenchmarkDataset(bm_val), shuffle=True)
-    test_data_loader = torch.utils.data.DataLoader(BenchmarkDataset(bm_test), shuffle=True)
+    train_data_loader = DataLoader(BenchmarkDataset(bm_meta), shuffle=True)
+    val_data_loader = DataLoader(BenchmarkDataset(bm_val), shuffle=True)
+    test_data_loader = DataLoader(BenchmarkDataset(bm_test), shuffle=True)
     return train_data_loader, val_data_loader, test_data_loader
     
 def _create_benchmarks(config: dict):

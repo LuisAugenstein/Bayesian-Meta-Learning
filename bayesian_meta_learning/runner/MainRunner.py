@@ -39,20 +39,20 @@ class MainRunner():
         self.algo = algorithms[config['algorithm']](config)
 
     def run(self) -> None:
-        # checkpoint_path = os.path.join(
-        #     self.config['logdir_models'],
-        #     f"Epoch_{self.config['evaluation_epoch']}.pt")
+        checkpoint_path = os.path.join(
+            self.config['logdir'], f"Epoch_{self.config['num_models']}.pt")
 
         # Only train if retraining is requested or no model with the current config exists
-        # if not self.config['reuse_models'] or not os.path.exists(checkpoint_path):
-        self.algo.train(train_dataloader=self.train_dataloader,
-                        val_dataloader=self.val_dataloader)
+        if not self.config['reuse_models'] or not os.path.exists(checkpoint_path):
+            self.algo.train(train_dataloader=self.train_dataloader,
+                            val_dataloader=self.val_dataloader)
         # self.algo.test(self.test_dataloader)
 
         # # visualize the dataset (training, validation and testing)
-        # print(f"Plots are stored at {self.config['logdir_plots']}")
-        # visualizer.plot_tasks_initially(
-        #     'Meta_Training_Tasks', self.algo, self.train_dataloader, self.config)
+        print("Visualization is started.")
+        print(f"Plots are stored at {self.config['logdir_plots']}")
+        visualizer.plot_tasks_initially(
+            'Meta_Training_Tasks', self.algo, self.train_dataloader, self.config)
         # visualizer.plot_tasks_initially(
         #     'Meta_Validation_Tasks', self.algo, self.val_dataloader, self.config)
         # visualizer.plot_tasks_initially(

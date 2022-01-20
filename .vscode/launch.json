@@ -5,7 +5,7 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "default parameters",
+            "name": "Local Run",
             "type": "python",
             "request": "launch",
             "program": "train.py",
@@ -14,11 +14,17 @@
                 "PYTHONWARNINGS": "ignore"
             },
             "args": [
-                //possible algorithms (baseline, maml, platipus, bmaml)
-                "--algorithm", "maml",
+                "--algorithm", "maml", // maml, platipus, bmaml, or baseline
+                "--num_episodes_per_epoch", "100",
+                "--k_shot", "5",
+                "--minibatch", "1",
+                "--num_train_tasks", "2",
+                "--num_validation_tasks", "1",
+                "--num_test_tasks", "1",
+                "--reuse_models", "True"
             ]
         },
-        //SANITY CHECKS always only change the algorithm
+        //SANITY CHECKS (test trivial examples on which the results should be really good)
         {
             "name": "Adaptation Test",
             "type": "python",
@@ -30,14 +36,13 @@
             },
             "args": [
                 // changeable parameters
-                "--algorithm", "platipus", // 
+                "--algorithm", "maml", // maml, platipus, bmaml, or baseline
                 "--num_inner_updates", "10000", // 0 for initial model, 10000 for many adaptations
-                "--num_models", "5",
-                "--minibatch", "1",
+                "--num_train_tasks", "1",
                 // don't change parameters below
                 "--k_shot", "80",
-                "--minibatch_validation", "0",
-                "--minibatch_test", "0",
+                "--num_validation_tasks", "0",
+                "--num_test_tasks", "0",
                 "--num_epochs", "0",
             ]
         },
@@ -69,7 +74,7 @@
                 "PYTHONWARNINGS": "ignore"
             },
             "args": [
-                "--algorithm", "maml",
+                "--algorithm", "platipus",
                 "--minibatch", "2",
                 "--minibatch_validation", "1",
                 "--minibatch_test", "2",

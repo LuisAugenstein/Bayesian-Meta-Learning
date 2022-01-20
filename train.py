@@ -30,14 +30,14 @@ def main():
                         help='number of tasks used for validation during training')
     parser.add_argument("--num_test_tasks", default=20, type=int,
                         help='number of meta testing tasks')
-    parser.add_argument("--num_points_per_test_task", default=256, type=int,
+    parser.add_argument("--num_points_per_test_task", default=512, type=int,
                         help='number of datapoints in each meta testing task')
 
     parser.add_argument("--reuse_models", default=False, type=bool,
                         help='Specifies if a saved state should be used if found or if the model should be trained from start.')
     parser.add_argument("--normalize_benchmark", default=True, type=bool)
 
-    parser.add_argument("--wandb", default=True, type=bool,
+    parser.add_argument("--wandb", default=False, type=bool,
                         help="Specifies if logs should be written to WandB")
     parser.add_argument("--num_visualization_tasks", default=4, type=int,
                         help='number of randomly chosen meta testing tasks that are used for visualization')
@@ -57,18 +57,20 @@ def main():
     parser.add_argument("--network_architecture", default="FcNet")
     parser.add_argument("--num_epochs", default=5, type=int,
                         help='number of training epochs. one epoch corresponds to one meta update for theta. model is stored all 500 epochs')
-    parser.add_argument('--num_episodes_per_epoch', default=2000, type=int,
+    parser.add_argument('--num_episodes_per_epoch', default=10000, type=int,
                         help='Save meta-parameters after this number of episodes')
-    parser.add_argument("--num_models", default=1, type=int,
+    parser.add_argument("--num_models", default=5, type=int,
                         help='number of models (phi) we sample from the posterior in the end for evaluation. irrelevant for maml')
     parser.add_argument('--minibatch', default=20, type=int,
                         help='Minibatch of episodes (tasks) to update meta-parameters')
+    parser.add_argument('--minibatch_print', default=10, type=int,
+                        help='number of minibatches between each validation printing')
     parser.add_argument("--num_inner_updates", default=5, type=int,
                         help='number of SGD steps during adaptation')
     parser.add_argument("--inner_lr", default=0.01, type=float)
     parser.add_argument("--meta_lr", default=1e-3, type=float)
     parser.add_argument("--KL_weight", default=1e-6, type=float)
-    parser.add_argument('--num-episodes', type=int, default=100,
+    parser.add_argument('--num_episodes', type=int, default=100,
                         help='Number of episodes used in testing')
     parser.add_argument("--resume_epoch", default=0,
                         help='0 means fresh training. >0 means training continues from a corresponding stored model.')
@@ -85,7 +87,7 @@ def main():
     for key in args.__dict__:
         config[key] = args.__dict__[key]
 
-    config['minibatch_print'] = config['minibatch']
+    config['minibatch_print'] *= config['minibatch']
     config['loss_function'] = torch.nn.MSELoss()
     config['train_val_split_function'] = train_val_split_regression
 
