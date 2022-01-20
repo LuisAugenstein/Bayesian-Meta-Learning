@@ -4,6 +4,7 @@ import os
 import argparse
 import pathlib
 from bayesian_meta_learning.runner.MainRunner import MainRunner
+from bayesian_meta_learning.runner.NlmlRunner import NlmlRunner
 from few_shot_meta_learning._utils import train_val_split_regression
 
 # --------------------------------------------------
@@ -13,6 +14,8 @@ def main():
     parser = argparse.ArgumentParser(description='Setup variables')
 
     # Own arguments
+    parser.add_argument("--runner", default='main_runner', type=str,
+                        help='main_runner, nlml_runner')
     parser.add_argument("--noise_stddev", default=0.02, type=float,
                         help='standard deviation of the white gaussian noise added to the data targets y')
     parser.add_argument("--seed", default=123, type=int,
@@ -98,7 +101,11 @@ def main():
     create_save_models_directory(config) 
 
     # choose a Runner and start the run
-    runner = MainRunner(config)
+    runners = {
+        'main_runner': MainRunner,
+        'nlml_runner': NlmlRunner
+    }
+    runner = runners[config['runner']](config)
     runner.run()
 
 def create_save_models_directory(config: dict):
