@@ -4,7 +4,7 @@ from torch.utils.data.dataloader import DataLoader
 from torch import Tensor
 from typing import Tuple
 
-def test_neg_log_marginal_likelihood(algo, test_dataloader: DataLoader, config: dict):
+def test_neg_log_marginal_likelihood(algo, test_dataloader: DataLoader, config: dict) -> float:
     print("Testing is started.")
     model = algo.load_model(
         resume_epoch=config["num_epochs"], hyper_net_class=algo.hyper_net_class, eps_dataloader=test_dataloader)
@@ -14,7 +14,9 @@ def test_neg_log_marginal_likelihood(algo, test_dataloader: DataLoader, config: 
         noise_var = config['noise_stddev']**2
         exponent = - torch.norm(y_pred[task_index] - y_test[task_index], dim=1)**2 / (2*noise_var)
         nlml_per_task[task_index] = - torch.logsumexp(exponent, dim=0)
-    print(f"NLML: {torch.mean(nlml_per_task).item()}\n")
+    nlml = torch.mean(nlml_per_task).item()
+    print(f"NLML: {nlml}\n")
+    return nlml
 
 
 def _predict_all_tasks(algo, model, task_dataloader, config: dict) -> Tuple[Tensor, Tensor]:

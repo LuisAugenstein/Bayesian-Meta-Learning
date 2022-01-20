@@ -1,43 +1,12 @@
-from copy import deepcopy
-import torch
 import os
-import numpy as np
-import random
-
 from bayesian_meta_learning import visualizer
-from bayesian_meta_learning.benchmark.benchmark_dataloader import create_benchmark_dataloaders
-from bayesian_meta_learning.algorithms import Baseline
 from bayesian_meta_learning.nlml_tester import test_neg_log_marginal_likelihood
-
-from few_shot_meta_learning.Maml import Maml
-from few_shot_meta_learning.Platipus import Platipus
-from few_shot_meta_learning.Bmaml import Bmaml
-from few_shot_meta_learning.HyperNetClasses import IdentityNet, NormalVariationalNet
+from bayesian_meta_learning.runner.BaseRunner import BaseRunner
 
 
-def apply_random_seed(num: int):
-    torch.manual_seed(num)
-    torch.cuda.manual_seed(num)
-    np.random.seed(num)
-    random.seed(num)
-
-
-class MainRunner():
+class MainRunner(BaseRunner):
     def __init__(self, config) -> None:
-        self.config = config
-
-        apply_random_seed(config['seed'])
-
-        self.train_dataloader, self.val_dataloader, self.test_dataloader = create_benchmark_dataloaders(
-            config)
-
-        algorithms = {
-            'maml': Maml,
-            'bmaml': Bmaml,
-            'platipus': Platipus,
-            'baseline': Baseline
-        }
-        self.algo = algorithms[config['algorithm']](config)
+        super().__init__(config=config)
 
     def run(self) -> None:
         checkpoint_path = os.path.join(
@@ -68,4 +37,3 @@ class MainRunner():
         # visualize Predictions for test tasks of only the last model
         visualizer.plot_task_results(
             'Testing', self.config['num_epochs'], self.algo, self.test_dataloader, self.config)
-        # # TODO: Calculate/Query all the statistics we want to know about...
