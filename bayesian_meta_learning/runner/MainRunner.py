@@ -7,6 +7,7 @@ import random
 from bayesian_meta_learning import visualizer
 from bayesian_meta_learning.benchmark.benchmark_dataloader import create_benchmark_dataloaders
 from bayesian_meta_learning.algorithms import Baseline
+from bayesian_meta_learning.nlml_tester import test_neg_log_marginal_likelihood
 
 from few_shot_meta_learning.Maml import Maml
 from few_shot_meta_learning.Platipus import Platipus
@@ -46,24 +47,25 @@ class MainRunner():
         if not self.config['reuse_models'] or not os.path.exists(checkpoint_path):
             self.algo.train(train_dataloader=self.train_dataloader,
                             val_dataloader=self.val_dataloader)
-        # self.algo.test(self.test_dataloader)
+        # test
+        test_neg_log_marginal_likelihood(self.algo, self.test_dataloader, self.config)
 
         # # visualize the dataset (training, validation and testing)
         print("Visualization is started.")
         print(f"Plots are stored at {self.config['logdir_plots']}")
         visualizer.plot_tasks_initially(
             'Meta_Training_Tasks', self.algo, self.train_dataloader, self.config)
-        # visualizer.plot_tasks_initially(
-        #     'Meta_Validation_Tasks', self.algo, self.val_dataloader, self.config)
-        # visualizer.plot_tasks_initially(
-        #     'Meta_Testing_Tasks', self.algo, self.test_dataloader, self.config)
+        visualizer.plot_tasks_initially(
+            'Meta_Validation_Tasks', self.algo, self.val_dataloader, self.config)
+        visualizer.plot_tasks_initially(
+            'Meta_Testing_Tasks', self.algo, self.test_dataloader, self.config)
         # # visualize predictions for training and validation tasks of each stored model
-        # for epoch in range(self.config['epochs_to_store'], self.config['evaluation_epoch']+1, self.config['epochs_to_store']):
-        #     visualizer.plot_task_results(
-        #         'Training', epoch, self.algo, self.train_dataloader, self.config)
-        #     visualizer.plot_task_results(
-        #         'Validation', epoch, self.algo, self.val_dataloader, self.config)
-        # # visualize Predictions for test tasks of only the last model
-        # visualizer.plot_task_results(
-        #     'Testing', self.config['evaluation_epoch'], self.algo, self.test_dataloader, self.config)
+        for epoch in range(1, self.config['num_epochs']+1):
+            visualizer.plot_task_results(
+                'Training', epoch, self.algo, self.train_dataloader, self.config)
+            visualizer.plot_task_results(
+                'Validation', epoch, self.algo, self.val_dataloader, self.config)
+        # visualize Predictions for test tasks of only the last model
+        visualizer.plot_task_results(
+            'Testing', self.config['num_epochs'], self.algo, self.test_dataloader, self.config)
         # # TODO: Calculate/Query all the statistics we want to know about...

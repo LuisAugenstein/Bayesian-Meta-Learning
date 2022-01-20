@@ -1,12 +1,12 @@
-from typing import Tuple
+import os
 import wandb
 import torch
-from torch.utils.data.dataloader import DataLoader
-import os
-import numpy as np
 import random
+import numpy as np
 import matplotlib.pyplot as plt
-
+from torch import Tensor
+from typing import Tuple
+from torch.utils.data.dataloader import DataLoader
 
 
 def plot_tasks_initially(caption, algo, task_dataloader: DataLoader, config):
@@ -15,25 +15,15 @@ def plot_tasks_initially(caption, algo, task_dataloader: DataLoader, config):
     model = model = algo.load_model(
         resume_epoch=0.1, hyper_net_class=algo.hyper_net_class, eps_dataloader=task_dataloader)
     plotting_data = [None] * task_dataloader.dataset.n_tasks
+    y_pred, y_test, x_test, y_train, x_train = _predict_all_tasks(
+        algo, model, task_dataloader, config)
     for task_index in range(task_dataloader.dataset.n_tasks):
-        task_data = task_dataloader.dataset[task_index]
-        x_train, y_train, x_test, y_test = _split_data(task_data, config)
-        # set seeds for platipus so that the samples phi are drawn equally for each dataset
-        if config['algorithm'] == 'platipus':
-            torch.manual_seed(123)
-            torch.cuda.manual_seed(123)
-        # plot prediction of the initial model
-        phi = algo.adaptation(x_train[:, None], y_train[:, None], model)
-        y_pred = algo.prediction(x_test, phi, model)
-        if config['algorithm'] == 'platipus' or config['algorithm'] == 'bmaml':
-            # platipus/bmaml return no tensor but a list of S tensors
-            y_pred = torch.stack(y_pred)
         plotting_data[task_index] = {
-            'x_train': x_train.squeeze().cpu().detach().numpy(),
-            'y_train': y_train.squeeze().cpu().detach().numpy(),
-            'x_test': x_test.squeeze().cpu().detach().numpy(),
-            'y_test': y_test.squeeze().cpu().detach().numpy(),
-            'y_pred': y_pred.squeeze().cpu().detach().numpy()
+            'x_train': x_train[task_index].squeeze().cpu().detach().numpy(),
+            'y_train': y_train[task_index].squeeze().cpu().detach().numpy(),
+            'x_test': x_test[task_index].squeeze().cpu().detach().numpy(),
+            'y_test': y_test[task_index].squeeze().cpu().detach().numpy(),
+            'y_pred': y_pred[task_index].squeeze().cpu().detach().numpy()
         }
     _generate_task_initially_plots(caption, plotting_data, config)
 
@@ -45,21 +35,30 @@ def plot_task_results(caption, epoch, algo, task_dataloader, config):
         resume_epoch=epoch, hyper_net_class=algo.hyper_net_class, eps_dataloader=task_dataloader)
     num_visualization_tasks = np.min(
         [config['num_visualization_tasks'], task_dataloader.dataset.n_tasks])
+    y_pred, y_test, x_test, y_train, x_train = _predict_all_tasks(
+        algo, model, task_dataloader, config)
     plotting_data = [None] * num_visualization_tasks
-    for task_index, task_data in enumerate(task_dataloader):
-        if task_index >= num_visualization_tasks:
-            break
-        # samples and true target function of the task
-        x_train, y_train, x_test, y_test = _split_data(task_data, config)
-        # approximate posterior predictive distribution
-        y_pred, heat_map, y_resolution = _predict_test_data(
-            algo, model, x_train, y_train, x_test, y_test, config)
+    for task_index in range(num_visualization_tasks):
+        R = config['y_plotting_resolution']
+        S = y_pred.shape[1]
+        N = y_pred.shape[2]
+        y_combined = torch.concat([y_test[task_index], y_pred[task_index]])
+        start, end = (torch.min(y_combined).data, torch.max(y_combined).data)
+        y_resolution = torch.linspace(start, end, R)
+        y_broadcasted = torch.broadcast_to(y_resolution, (1, N, R))
+        y_p = torch.broadcast_to(y_pred[task_index, :, :, None], (S, N, 1))
+        # generate heat_map with density values at the discretized points
+        noise_var = config['noise_stddev']**2
+        heat_maps = torch.exp(-(y_broadcasted-y_p)**2/(
+            2*noise_var)) / np.sqrt(2*torch.pi*noise_var)
+        heat_map = torch.mean(heat_maps, axis=0)
+        heat_map = heat_map[1:, 1:].T
         plotting_data[task_index] = {
-            'x_train': x_train.squeeze().cpu().detach().numpy(),
-            'y_train': y_train.squeeze().cpu().detach().numpy(),
-            'x_test': x_test.squeeze().cpu().detach().numpy(),
-            'y_test': y_test.squeeze().cpu().detach().numpy(),
-            'y_pred': y_pred.squeeze().detach().numpy(),
+            'x_train': x_train[task_index].squeeze().cpu().detach().numpy(),
+            'y_train': y_train[task_index].squeeze().cpu().detach().numpy(),
+            'x_test': x_test[task_index].squeeze().cpu().detach().numpy(),
+            'y_test': y_test[task_index].squeeze().cpu().detach().numpy(),
+            'y_pred': y_pred[task_index].squeeze().detach().numpy(),
             'heat_map': heat_map.cpu().detach().numpy(),
             'y_resolution': y_resolution.detach().numpy(),
         }
@@ -67,51 +66,43 @@ def plot_task_results(caption, epoch, algo, task_dataloader, config):
     _generate_plots(caption, epoch, plotting_data, config)
 
 
-def _split_data(task_data, config):
-    task_data_T = [task_data[i].T for i in range(len(task_data))]
-    x_test, sort_indices = torch.sort(task_data_T[0].squeeze())
-    x_test = x_test[:, None]
-    y_test = task_data_T[1][sort_indices]
-    # use random seed to draw the k-shot samples equal for all evaluations
-    random.seed(config['seed'])
-    # generate training samples and move them to GPU (if there is a GPU)
-    split_data = config['train_val_split_function'](
-        eps_data=task_data, k_shot=config['k_shot'])
-    x_train = split_data['x_t'].to(config['device'])
-    y_train = split_data['y_t'].to(config['device'])
-    return x_train, y_train, x_test, y_test
-
-
-def _predict_test_data(algo, model, x_train, y_train, x_test, y_test, config):
+def _predict_all_tasks(algo, model, task_dataloader, config: dict) -> Tuple[Tensor, Tensor, Tensor, Tensor, Tensor]:
     S = 1 if config['algorithm'] == 'maml' else config['num_models']
-    N = x_test.shape[0]  # equals points_per_minibatch for the considered task
-    R = config['y_plotting_resolution']
-    noise_var = config['noise_stddev']**2
-
-    # platipus uses random samples theta. we want them to be always the same
-    if config['algorithm'] == 'platipus':
-        torch.manual_seed(123)
-        torch.cuda.manual_seed(123)
-    adapted_hyper_net = algo.adaptation(x_train, y_train, model)
-    # predict x_test
-    y_pred = algo.prediction(x_test, adapted_hyper_net, model)
-    if config['algorithm'] == 'platipus' or config['algorithm'] == 'bmaml':
-        # platipus/bmaml return no tensor but a list of S tensors
-        y_pred = torch.stack(y_pred)
-    y_pred = torch.broadcast_to(y_pred, (S, N, 1))
-
-    # discretize the relevant space of y-values
-    y_combined = torch.concat([y_test[None, :], y_pred])
-    start, end = (torch.min(y_combined).data, torch.max(y_combined).data)
-    y_resolution = torch.linspace(start, end, R)
-    y_broadcasted = torch.broadcast_to(y_resolution, (1, N, R))
-
-    # generate heat_map with density values at the discretized points
-    heat_maps = torch.exp(-(y_broadcasted-y_pred)**2/(
-        2*noise_var)) / np.sqrt(2*torch.pi*noise_var)
-    heat_map = torch.mean(heat_maps, axis=0)
-    heat_map = heat_map[1:, 1:].T
-    return y_pred, heat_map, y_resolution
+    T = task_dataloader.dataset.n_tasks
+    N = task_dataloader.dataset[0][0].shape[0]
+    y_pred = torch.zeros((T, S, N))
+    y_test = torch.zeros((T, 1, N))
+    x_test = torch.zeros((T, 1, N))
+    x_train = torch.zeros((T, 1, config['k_shot']))
+    y_train = torch.zeros((T, 1, config['k_shot']))
+    for task_index in range(task_dataloader.dataset.n_tasks):
+        task_data = task_dataloader.dataset[task_index]
+        # split the data
+        x_test_t, sort_indices = torch.sort(task_data[0])
+        y_test_t = task_data[1][sort_indices]
+        # use random seed to draw the k-shot samples equal for all evaluations
+        random.seed(config['seed'])
+        # generate training samples and move them to GPU (if there is a GPU)
+        split_data = config['train_val_split_function'](
+            eps_data=task_data, k_shot=config['k_shot'])
+        x_train_t = split_data['x_t'].to(config['device'])
+        y_train_t = split_data['y_t'].to(config['device'])
+        # set seeds for platipus so that the samples phi are drawn equally for each dataset
+        if config['algorithm'] == 'platipus':
+            torch.manual_seed(123)
+            torch.cuda.manual_seed(123)
+        # plot prediction of the initial model
+        phi = algo.adaptation(x_train_t[:, None], y_train_t[:, None], model)
+        y_pred_t = algo.prediction(x_test_t[:, None], phi, model)
+        if config['algorithm'] == 'platipus' or config['algorithm'] == 'bmaml':
+            # platipus/bmaml return no tensor but a list of S tensors
+            y_pred_t = torch.stack(y_pred)
+        y_pred[task_index] = y_pred_t.squeeze()
+        y_test[task_index] = y_test_t
+        x_test[task_index] = x_test_t
+        x_train[task_index] = x_train_t
+        y_train[task_index] = y_train_t
+    return y_pred, y_test, x_test, y_train, x_train
 
 
 # ==============================================
@@ -165,7 +156,7 @@ def _save_plot(caption, index, config):
         filename = f"{caption}" if index == "" else f"{caption}-{index}"
         save_path = os.path.join(config['logdir_plots'], filename)
         plt.savefig(save_path)
-        print(f"stored plot: {filename}")
+        print(f"stored: {filename}")
 
 
 def _plot_distribution(data, ax, fig):
