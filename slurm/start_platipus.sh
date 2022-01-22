@@ -5,9 +5,10 @@
 #SBATCH --time=8:00:00
 #SBATCH --parsable
 
-# Testing MAML with params from the paper
+# Testing PLATIPUS with params from the paper
+# Not many hyperparams provided, assumed to be similar to MAML
 
-echo 'MAML started'
+echo 'PLATIPUS started'
 
 EPOCHS=70000
 EPOCHS_TO_STORE=2000
@@ -21,17 +22,17 @@ done
 
 for benchmark in Sinusoid1D
 do
-    for num_samples in 10 5
+    for num_samples in 1 5 10
     do
         for num_inner_updates in 1 10
         do
             for seed in 1234 4321 9999 889 441 588 7741
             do
-                python train.py --algorithm maml \
+                python train.py --algorithm platipus \
                                 --wandb True \
                                 --num_epochs $EPOCHS \
                                 --benchmark $benchmark \
-                                --num_models 1 \
+                                --num_models 10 \
                                 --k_shot $num_samples \
                                 --seed $seed \
                                 --seed_offset $seed \
