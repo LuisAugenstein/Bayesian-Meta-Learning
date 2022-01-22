@@ -10,6 +10,8 @@ from few_shot_meta_learning._utils import train_val_split_regression
 # --------------------------------------------------
 # SETUP INPUT PARSER
 # --------------------------------------------------
+
+
 def main():
     parser = argparse.ArgumentParser(description='Setup variables')
 
@@ -36,6 +38,11 @@ def main():
     parser.add_argument("--num_points_per_test_task", default=512, type=int,
                         help='number of datapoints in each meta testing task')
 
+    parser.add_argument("--num_hidden", default=2, type=int,
+                        help='number of hidden layers if using a fully connceted network')
+    parser.add_argument("--hidden_size", default=40, type=int,
+                        help='hidden layer size if using a fully connected network')
+
     parser.add_argument("--reuse_models", default=False, type=bool,
                         help='Specifies if a saved state should be used if found or if the model should be trained from start.')
     parser.add_argument("--normalize_benchmark", default=True, type=bool)
@@ -61,7 +68,7 @@ def main():
     parser.add_argument("--num_epochs", default=5, type=int,
                         help='number of training epochs. one epoch corresponds to one meta update for theta. model is stored all 500 epochs')
     parser.add_argument('--num_episodes_per_epoch', default=10000, type=int,
-                        help='Save meta-parameters after this number of episodes')
+                        help='Number of minibatches the model is adapted on in every meta iteration. If -1, trained once on every task (every task ends up in one minibatch).')
     parser.add_argument("--num_models", default=5, type=int,
                         help='number of models (phi) we sample from the posterior in the end for evaluation. irrelevant for maml')
     parser.add_argument('--minibatch', default=20, type=int,
@@ -98,7 +105,13 @@ def main():
         else torch.device('cpu')
 
     # create directory tree to store models and plots
-    create_save_models_directory(config) 
+    create_save_models_directory(config)
+
+    # If specified, make every task appear in one minibtach. Make the optimizer train once
+    # on every minibtach in each meta iteration
+    if config['num_episodes_per_epoch'] == -1:
+        config['num_episodes_per_epoch'] = int(
+            config['num_train_tasks'] / config['minibatch'])
 
     # choose a Runner and start the run
     runners = {
@@ -107,6 +120,7 @@ def main():
     }
     runner = runners[config['runner']](config)
     runner.run()
+
 
 def create_save_models_directory(config: dict):
     logdir = os.path.join(config['logdir_base'], 'saved_models',
