@@ -48,6 +48,12 @@ def plot_task_results(caption, epoch, algo, task_dataloader, config):
         y_resolution = torch.linspace(start, end, R)
         y_broadcasted = torch.broadcast_to(y_resolution, (1, N, R))
         y_p = torch.broadcast_to(y_pred[task_index, :, :, None], (S, N, 1))
+
+        # move to cpu
+        y_p = y_p.cpu()
+        y_broadcasted = y_broadcasted.cpu()
+        y_resolution = y_resolution.cpu()
+
         # generate heat_map with density values at the discretized points
         noise_var = config['noise_stddev']**2
         heat_maps = torch.exp(-(y_broadcasted-y_p)**2/(
