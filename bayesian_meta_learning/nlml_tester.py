@@ -45,9 +45,10 @@ def _predict_all_tasks(algo, model, task_dataloader, config: dict) -> Tuple[Tens
         # adapt model and predict test set
         phi = algo.adaptation(x_train_t[:, None], y_train_t[:, None], model)
         y_pred_t = algo.prediction(x_test_t[:, None], phi, model)
+
         if config['algorithm'] == 'platipus' or config['algorithm'] == 'bmaml':
             # platipus/bmaml return no tensor but a list of S tensors
-            y_pred_t = torch.stack(y_pred)
+            y_pred_t = torch.stack(y_pred_t)
         y_pred[task_index] = y_pred_t.squeeze()
         y_test[task_index] = y_test_t
     return y_pred, y_test
