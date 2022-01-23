@@ -70,11 +70,11 @@ def _predict_all_tasks(algo, model, task_dataloader, config: dict) -> Tuple[Tens
     S = 1 if config['algorithm'] == 'maml' else config['num_models']
     T = task_dataloader.dataset.n_tasks
     N = task_dataloader.dataset[0][0].shape[0]
-    y_pred = torch.zeros((T, S, N))
-    y_test = torch.zeros((T, 1, N))
-    x_test = torch.zeros((T, 1, N))
-    x_train = torch.zeros((T, 1, config['k_shot']))
-    y_train = torch.zeros((T, 1, config['k_shot']))
+    y_pred = torch.zeros((T, S, N)).to(config['device'])
+    y_test = torch.zeros((T, 1, N)).to(config['device'])
+    x_test = torch.zeros((T, 1, N)).to(config['device'])
+    x_train = torch.zeros((T, 1, config['k_shot'])).to(config['device'])
+    y_train = torch.zeros((T, 1, config['k_shot'])).to(config['device'])
     for task_index in range(task_dataloader.dataset.n_tasks):
         task_data = task_dataloader.dataset[task_index]
         # split the data
