@@ -3,7 +3,8 @@ import torch
 import numpy as np
 import random
 from abc import ABC, abstractmethod
-from bayesian_meta_learning.algorithms import Baseline
+from bayesian_meta_learning.algorithms.Baseline import Baseline
+from bayesian_meta_learning.algorithms.BmamlChaser import BmamlChaser
 from few_shot_meta_learning.Maml import Maml
 from few_shot_meta_learning.Platipus import Platipus
 from few_shot_meta_learning.Bmaml import Bmaml
@@ -22,7 +23,8 @@ class BaseRunner(ABC):
             'maml': Maml,
             'bmaml': Bmaml,
             'platipus': Platipus,
-            'baseline': Baseline
+            'baseline': Baseline,
+            'bmaml-chaser': BmamlChaser
         }
         self.algo = algorithms[config['algorithm']](config)
         return
