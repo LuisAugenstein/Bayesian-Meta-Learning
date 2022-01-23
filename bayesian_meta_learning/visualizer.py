@@ -1,3 +1,4 @@
+from cgi import test
 import os
 import wandb
 import torch
@@ -80,6 +81,11 @@ def _predict_all_tasks(algo, model, task_dataloader, config: dict) -> Tuple[Tens
         # split the data
         x_test_t, sort_indices = torch.sort(task_data[0])
         y_test_t = task_data[1][sort_indices]
+
+        # Move to gpu if available
+        x_test_t = x_test_t.to(config['device'])
+        y_test_t = y_test_t.to(config['device'])
+
         # use random seed to draw the k-shot samples equal for all evaluations
         random.seed(config['seed'])
         # generate training samples and move them to GPU (if there is a GPU)
