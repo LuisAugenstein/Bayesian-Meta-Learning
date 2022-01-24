@@ -65,9 +65,9 @@ def plot_task_results(caption, epoch, algo, task_dataloader, config):
             'y_train': y_train[task_index].squeeze().cpu().detach().numpy(),
             'x_test': x_test[task_index].squeeze().cpu().detach().numpy(),
             'y_test': y_test[task_index].squeeze().cpu().detach().numpy(),
-            'y_pred': y_pred[task_index].squeeze().detach().numpy(),
+            'y_pred': y_pred[task_index].squeeze().cpu().detach().numpy(),
             'heat_map': heat_map.cpu().detach().numpy(),
-            'y_resolution': y_resolution.detach().numpy(),
+            'y_resolution': y_resolution.cpu().detach().numpy(),
         }
     # plot the plotting data
     _generate_plots(caption, epoch, plotting_data, config)
