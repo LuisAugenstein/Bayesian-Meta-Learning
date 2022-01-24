@@ -1,3 +1,4 @@
+from cgi import test
 import os
 import wandb
 import torch
@@ -47,6 +48,12 @@ def plot_task_results(caption, epoch, algo, task_dataloader, config):
         y_resolution = torch.linspace(start, end, R)
         y_broadcasted = torch.broadcast_to(y_resolution, (1, N, R))
         y_p = torch.broadcast_to(y_pred[task_index, :, :, None], (S, N, 1))
+
+        # move to cpu
+        y_p = y_p.cpu()
+        y_broadcasted = y_broadcasted.cpu()
+        y_resolution = y_resolution.cpu()
+
         # generate heat_map with density values at the discretized points
         noise_var = config['noise_stddev']**2
         heat_maps = torch.exp(-(y_broadcasted-y_p)**2/(
@@ -58,9 +65,9 @@ def plot_task_results(caption, epoch, algo, task_dataloader, config):
             'y_train': y_train[task_index].squeeze().cpu().detach().numpy(),
             'x_test': x_test[task_index].squeeze().cpu().detach().numpy(),
             'y_test': y_test[task_index].squeeze().cpu().detach().numpy(),
-            'y_pred': y_pred[task_index].squeeze().detach().numpy(),
+            'y_pred': y_pred[task_index].squeeze().cpu().detach().numpy(),
             'heat_map': heat_map.cpu().detach().numpy(),
-            'y_resolution': y_resolution.detach().numpy(),
+            'y_resolution': y_resolution.cpu().detach().numpy(),
         }
     # plot the plotting data
     _generate_plots(caption, epoch, plotting_data, config)
@@ -70,16 +77,21 @@ def _predict_all_tasks(algo, model, task_dataloader, config: dict) -> Tuple[Tens
     S = 1 if config['algorithm'] == 'maml' else config['num_models']
     T = task_dataloader.dataset.n_tasks
     N = task_dataloader.dataset[0][0].shape[0]
-    y_pred = torch.zeros((T, S, N))
-    y_test = torch.zeros((T, 1, N))
-    x_test = torch.zeros((T, 1, N))
-    x_train = torch.zeros((T, 1, config['k_shot']))
-    y_train = torch.zeros((T, 1, config['k_shot']))
+    y_pred = torch.zeros((T, S, N)).to(config['device'])
+    y_test = torch.zeros((T, 1, N)).to(config['device'])
+    x_test = torch.zeros((T, 1, N)).to(config['device'])
+    x_train = torch.zeros((T, 1, config['k_shot'])).to(config['device'])
+    y_train = torch.zeros((T, 1, config['k_shot'])).to(config['device'])
     for task_index in range(task_dataloader.dataset.n_tasks):
         task_data = task_dataloader.dataset[task_index]
         # split the data
         x_test_t, sort_indices = torch.sort(task_data[0])
         y_test_t = task_data[1][sort_indices]
+
+        # Move to gpu if available
+        x_test_t = x_test_t.to(config['device'])
+        y_test_t = y_test_t.to(config['device'])
+
         # use random seed to draw the k-shot samples equal for all evaluations
         random.seed(config['seed'])
         # generate training samples and move them to GPU (if there is a GPU)
