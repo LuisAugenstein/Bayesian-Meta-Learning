@@ -36,6 +36,7 @@ do
                                 --inner_lr 0.01 \
                                 --meta_lr 0.001 \
                                 --minibatch 20 \
+                                --num_episodes_per_epoch 20 \
                                 --noise_stddev 0.02 \
                                 --num_hidden 2 \
                                 --hidden_size 40 \
