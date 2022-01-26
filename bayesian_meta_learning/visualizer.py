@@ -160,12 +160,14 @@ def _generate_plots(caption, epoch, plotting_data, config):
     # save the plot
     _save_plot(caption, index=f"Epoch_{epoch}", config=config)
 
-
-def _save_plot(caption, index, config):
+# caption: main name of the file
+# index: Epoch_number
+def _save_plot(caption: str, index: str, config: dict):
+    filename = caption if index == -1 else f"{caption}_{index}"
     if config['wandb']:
         wandb.log({caption: wandb.Image(plt, index)})
+        print(f"stored to wandb: {filename}")
     else:
-        filename = f"{caption}" if index == "" else f"{caption}-{index}"
         save_path = os.path.join(config['logdir_plots'], filename)
         plt.savefig(save_path)
         print(f"stored: {filename}")

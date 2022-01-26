@@ -27,8 +27,6 @@ def main():
     parser.add_argument("--seed_offset_test", default=12345, type=int,
                         help='data generation seed for the meta testing task')
 
-    parser.add_argument("--num_train_tasks", default=16, type=int,
-                        help='number of meta training tasks')
     parser.add_argument("--num_points_per_train_task", default=512, type=int,
                         help='number of datapoints in each meta training task')
     parser.add_argument("--num_validation_tasks", default=4, type=int,
@@ -53,6 +51,8 @@ def main():
                         help='number of randomly chosen meta testing tasks that are used for visualization')
     parser.add_argument("--y_plotting_resolution", default=512, type=int,
                         help="number of discrete y-axis points to evaluate for visualization")
+    parser.add_argument("--epochs_to_save", default=1, type=int,
+                        help="number of epochs between saving the model")
 
     # fsml arguments
     parser.add_argument("--benchmark", default='Sinusoid1D',
@@ -67,14 +67,14 @@ def main():
     parser.add_argument("--network_architecture", default="FcNet")
     parser.add_argument("--num_epochs", default=5, type=int,
                         help='number of training epochs. one epoch corresponds to one meta update for theta. model is stored all 500 epochs')
-    parser.add_argument('--num_episodes_per_epoch', default=10000, type=int,
-                        help='Number of minibatches the model is adapted on in every meta iteration. If -1, trained once on every task (every task ends up in one minibatch).')
+    parser.add_argument('--num_episodes_per_epoch', default=20, type=int,
+                        help='Number of meta train tasks. should be a multiple of minibatch')
     parser.add_argument("--num_models", default=5, type=int,
                         help='number of models (phi) we sample from the posterior in the end for evaluation. irrelevant for maml')
     parser.add_argument('--minibatch', default=20, type=int,
                         help='Minibatch of episodes (tasks) to update meta-parameters')
-    parser.add_argument('--minibatch_print', default=10, type=int,
-                        help='number of minibatches between each validation printing')
+    parser.add_argument('--minibatch_print', default=1, type=int,
+                        help='number of minibatches between each validation plotting to wandb')
     parser.add_argument("--num_inner_updates", default=5, type=int,
                         help='number of SGD steps during adaptation')
     parser.add_argument("--inner_lr", default=0.01, type=float)
@@ -97,7 +97,21 @@ def main():
     for key in args.__dict__:
         config[key] = args.__dict__[key]
 
+    # check if minibatch is valid
+    if config['minibatch'] > config['num_episodes_per_epoch']:
+        print(f'invalid config: \n' +
+              f'minibatch={config["minibatch"]} needs to be smaller than num_episodes_per_epoch={config["num_episodes_per_epoch"]}. \n' +
+              f'new value minibatch={config["num_episodes_per_epoch"]}. \n')
+        config['minibatch'] = config['num_episodes_per_epoch']
+    
+    # check if minibatch_print is valid
     config['minibatch_print'] *= config['minibatch']
+    if config['minibatch_print'] > config['num_episodes_per_epoch']:
+        print(f'invalid config: \n' +
+              f'minibatch_print={config["minibatch"]} needs to be smaller than num_episodes_per_epoch={config["num_episodes_per_epoch"]}. \n' +
+              f'new value minibatch_print={config["num_episodes_per_epoch"]}. \n')
+        config['minibatch_print'] = config['num_episodes_per_epoch']
+    
     config['loss_function'] = torch.nn.MSELoss()
     config['train_val_split_function'] = train_val_split_regression
 
@@ -106,12 +120,6 @@ def main():
 
     # create directory tree to store models and plots
     create_save_models_directory(config)
-
-    # If specified, make every task appear in one minibtach. Make the optimizer train once
-    # on every minibtach in each meta iteration
-    if config['num_episodes_per_epoch'] == -1:
-        config['num_episodes_per_epoch'] = int(
-            config['num_train_tasks'] / config['minibatch'])
 
     # choose a Runner and start the run
     runners = {

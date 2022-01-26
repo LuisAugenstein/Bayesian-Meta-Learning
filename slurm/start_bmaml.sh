@@ -12,7 +12,6 @@
 echo 'BMAML started'
 
 EPOCHS=100000
-EPOCHS_TO_STORE=10000
 
 for ARGUMENT in "$@"
 do
@@ -32,11 +31,10 @@ do
                 python train.py --algorithm bmaml \
                                 --wandb True \
                                 --num_epochs 100000 \
-                                --num_train_tasks 100 \
                                 --benchmark $benchmark \
                                 --num_models $particles \
                                 --k_shot $num_samples \
-                                --num_episodes_per_epoch $EPOCHS_TO_STORE \
+                                --num_episodes_per_epoch 100 \
                                 --seed $seed \
                                 --seed_offset $seed \
                                 --seed_offset_test $seed \
@@ -52,11 +50,10 @@ do
                 python train.py --algorithm bmaml \
                                 --wandb True \
                                 --num_epochs 100000 \
-                                --num_train_tasks 1000 \
                                 --benchmark $benchmark \
                                 --num_models $particles \
                                 --k_shot $num_samples \
-                                --num_episodes_per_epoch $EPOCHS_TO_STORE \
+                                --num_episodes_per_epoch 100 \
                                 --seed $seed \
                                 --seed_offset $seed \
                                 --seed_offset_test $seed \

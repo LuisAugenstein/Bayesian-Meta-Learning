@@ -33,7 +33,7 @@ class MainRunner(BaseRunner):
         visualizer.plot_tasks_initially(
             'Meta_Testing_Tasks', self.algo, test_dataloader, self.config)
         # # visualize predictions for training and validation tasks of each stored model
-        for epoch in range(1, self.config['num_epochs']+1):
+        for epoch in range(self.config['epochs_to_save'], self.config['num_epochs']+1, self.config['epochs_to_save']):
             visualizer.plot_task_results(
                 'Training', epoch, self.algo, train_dataloader, self.config)
             visualizer.plot_task_results(

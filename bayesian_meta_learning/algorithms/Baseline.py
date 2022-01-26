@@ -43,8 +43,8 @@ class Baseline(Maml):
 
         for epoch_id in range(self.config['resume_epoch'], self.config['num_epochs'], 1):
             # for the Baseline loss_monitor is the loss on the whole task (not only on the validation set)
-            loss_monitor = [float] * self.config['num_train_tasks']
-            for task_id, task_data in islice(enumerate(train_dataloader), 0, self.config['num_train_tasks']):
+            loss_monitor = [float] * self.config['num_episodes_per_epoch']
+            for task_id, task_data in islice(enumerate(train_dataloader), 0, self.config['num_episodes_per_epoch']):
                 x = task_data[0].T
                 y = task_data[1].T
                 logits = self.prediction(
@@ -53,12 +53,12 @@ class Baseline(Maml):
                 if torch.isnan(loss):
                     raise ValueError("Loss is NaN.")
                 # calculate gradients w.r.t. hyper_net's parameters
-                loss = loss / self.config['num_train_tasks']
+                loss = loss / self.config['num_episodes_per_epoch']
                 loss.backward()
                 loss_monitor[task_id] = loss.item()
             loss_monitor = np.sum(loss_monitor)
             loss_train = np.mean(self.evaluate(
-                                    num_eps=self.config['num_train_tasks'],
+                                    num_eps=self.config['num_episodes_per_epoch'],
                                     eps_dataloader=train_dataloader, 
                                     model=model))
 
