@@ -25,7 +25,7 @@ def _create_benchmarks(config: dict):
         seed_noise=config["seed_offset"] + 2,
     )
     bm_val = BM_DICT[config["benchmark"]](
-        n_task=config["num_validation_tasks"],
+        n_task=config["num_episodes"],
         n_datapoints_per_task=config["num_points_per_train_task"],
         output_noise=config["noise_stddev"],
         seed_task=config["seed_offset"] + 10,

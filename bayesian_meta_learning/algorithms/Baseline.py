@@ -67,7 +67,7 @@ class Baseline(Maml):
                 # turn on EVAL mode to disable dropout
                 model["f_base_net"].eval()
                 loss_val = np.mean(self.evaluate(
-                                    num_eps=self.config['num_validation_tasks'],
+                                    num_eps=self.config['num_episodes'],
                                     eps_dataloader=val_dataloader, 
                                     model=model))
                 model["f_base_net"].train()

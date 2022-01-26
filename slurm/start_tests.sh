@@ -30,7 +30,7 @@ do
                     --k_shot 5 \
                     --minibatch 1 \
                     --num_episodes_per_epoch 1 \
-                    --num_validation_tasks 0 \
+                    --num_episodes 0 \
                     --noise_stddev 0.02 \
                     --num_inner_updates 1 \
                     --logdir_base /pfs/work7/workspace/scratch/utpqw-meta
