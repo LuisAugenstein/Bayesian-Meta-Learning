@@ -18,6 +18,7 @@ do
                     --num_episodes_per_epoch 20 \
                     --noise_stddev 0.02 \
                     --num_inner_updates 10000 \
+                    --epochs_to_save 1 \
                     --logdir_base /pfs/work7/workspace/scratch/utpqw-meta
                     
     python train.py --algorithm $algo \
