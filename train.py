@@ -47,11 +47,11 @@ def main():
 
     parser.add_argument("--wandb", default=False, type=bool,
                         help="Specifies if logs should be written to WandB")
-    parser.add_argument("--num_visualization_tasks", default=4, type=int,
+    parser.add_argument("--num_visualization_tasks", default=6, type=int,
                         help='number of randomly chosen meta testing tasks that are used for visualization')
     parser.add_argument("--y_plotting_resolution", default=512, type=int,
                         help="number of discrete y-axis points to evaluate for visualization")
-    parser.add_argument("--epochs_to_save", default=1, type=int,
+    parser.add_argument("--epochs_to_save", default=1000, type=int,
                         help="number of epochs between saving the model")
 
     # fsml arguments
@@ -59,7 +59,7 @@ def main():
                         help='possible values are Sinusoid1D, Affine1D, Quadratic1D, SinusoidAffine1D')
     parser.add_argument("--num_ways", default=1, type=int,
                         help='d_y dimension of targets')
-    parser.add_argument("--k_shot", default=1, type=int,
+    parser.add_argument("--k_shot", default=5, type=int,
                         help='number of datapoints in the context set (needs to be less than points_per_train_task)')
 
     parser.add_argument("--algorithm", default='maml',
@@ -69,13 +69,13 @@ def main():
                         help='number of training epochs. one epoch corresponds to one meta update for theta. model is stored all 500 epochs')
     parser.add_argument('--num_episodes_per_epoch', default=20, type=int,
                         help='Number of meta train tasks. should be a multiple of minibatch')
-    parser.add_argument("--num_models", default=5, type=int,
+    parser.add_argument("--num_models", default=10, type=int,
                         help='number of models (phi) we sample from the posterior in the end for evaluation. irrelevant for maml')
     parser.add_argument('--minibatch', default=20, type=int,
                         help='Minibatch of episodes (tasks) to update meta-parameters')
     parser.add_argument('--minibatch_print', default=1, type=int,
                         help='number of minibatches between each validation plotting to wandb')
-    parser.add_argument("--num_inner_updates", default=5, type=int,
+    parser.add_argument("--num_inner_updates", default=1, type=int,
                         help='number of SGD steps during adaptation')
     parser.add_argument("--inner_lr", default=0.01, type=float)
     parser.add_argument("--meta_lr", default=1e-3, type=float)
