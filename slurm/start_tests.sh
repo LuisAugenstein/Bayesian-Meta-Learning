@@ -7,7 +7,7 @@
 
 for algo in maml bmaml platipus
 do
-    python train.py --algorithm $algorithm \
+    python train.py --algorithm $algo \
                     --seed 9999 \
                     --wandb True \
                     --num_epochs 1 \
@@ -20,7 +20,7 @@ do
                     --num_inner_updates 10000 \
                     --logdir_base /pfs/work7/workspace/scratch/utpqw-meta
                     
-    python train.py --algorithm $algorithm \
+    python train.py --algorithm $algo \
                     --seed 9999 \
                     --wandb True \
                     --num_epochs 10000 \
