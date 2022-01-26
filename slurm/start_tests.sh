@@ -8,6 +8,7 @@
 for algo in maml bmaml platipus
 do
     python train.py --algorithm $algorithm \
+                    --seed 9999 \
                     --wandb True \
                     --num_epochs 1 \
                     --benchmark Sinusoid1D \
@@ -20,6 +21,7 @@ do
                     --logdir_base /pfs/work7/workspace/scratch/utpqw-meta
                     
     python train.py --algorithm $algorithm \
+                    --seed 9999 \
                     --wandb True \
                     --num_epochs 10000 \
                     --benchmark Sinusoid1D \
