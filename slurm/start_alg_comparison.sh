@@ -8,7 +8,7 @@
 # Testing PLATIPUS with params from the paper
 # Not many hyperparams provided, assumed to be similar to MAML
 
-echo 'PLATIPUS started'
+echo 'COMPARISON started'
 
 EPOCHS=10000
 
@@ -21,21 +21,20 @@ done
 
 for benchmark in Sinusoid1D
 do
-    for alg in baseline maml platipus bmaml 
+    for alg in baseline maml platipus bmaml
     do
         python train.py --algorithm $alg \
                         --wandb True \
                         --num_epochs 50000 \
                         --benchmark $benchmark \
                         --nlml_testing_enabled True \
-                        #values below are defaults 
                         --num_models 10 \
                         --k_shot 5 \
                         --num_inner_updates 1 \
-                        --seed 123 \
+                        --seed 5544 \
                         --inner_lr 0.01 \
                         --meta_lr 0.001 \
-        	            --minibatch 25 \
+        	        --minibatch 25 \
                         --num_episodes_per_epoch 25 \
                         --noise_stddev 0.02 \
                         --num_hidden 2 \
