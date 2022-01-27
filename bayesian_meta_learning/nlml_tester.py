@@ -4,6 +4,7 @@ from torch.utils.data.dataloader import DataLoader
 from torch import Tensor
 from typing import Tuple
 import numpy as np
+import wandb
 
 
 def test_neg_log_marginal_likelihood(algo, test_dataloader: DataLoader, config: dict) -> float:

@@ -3,8 +3,7 @@ import numpy as np
 import os
 import argparse
 import pathlib
-from bayesian_meta_learning.runner.MainRunner import MainRunner
-from bayesian_meta_learning.runner.NlmlRunner import NlmlRunner
+from bayesian_meta_learning.MainRunner import MainRunner
 from few_shot_meta_learning._utils import train_val_split_regression
 
 # --------------------------------------------------
@@ -16,8 +15,6 @@ def main():
     parser = argparse.ArgumentParser(description='Setup variables')
 
     # Own arguments
-    parser.add_argument("--runner", default='main_runner', type=str,
-                        help='main_runner, nlml_runner')
     parser.add_argument("--noise_stddev", default=0.02, type=float,
                         help='standard deviation of the white gaussian noise added to the data targets y')
     parser.add_argument("--seed", default=123, type=int,
@@ -39,6 +36,8 @@ def main():
     parser.add_argument("--hidden_size", default=40, type=int,
                         help='hidden layer size if using a fully connected network')
 
+    parser.add_argument("--nlml_testing_enabled", default=False, type=bool,
+                        help="whether to calculate neg log marginal likelihood or not.")
     parser.add_argument("--reuse_models", default=False, type=bool,
                         help='Specifies if a saved state should be used if found or if the model should be trained from start.')
     parser.add_argument("--normalize_benchmark", default=True, type=bool)
@@ -129,12 +128,8 @@ def main():
     # create directory tree to store models and plots
     create_save_models_directory(config)
 
-    # choose a Runner and start the run
-    runners = {
-        'main_runner': MainRunner,
-        'nlml_runner': NlmlRunner
-    }
-    runner = runners[config['runner']](config)
+    # start the run
+    runner = MainRunner(config)
     runner.run()
 
 def create_save_models_directory(config: dict):
