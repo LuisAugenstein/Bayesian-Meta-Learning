@@ -15,6 +15,6 @@ for benchmark in Sinusoid1D
 do
     for alg in baseline maml platipus bmaml
     do
-        sbatch slurm/alg_comparison.sh ALGO=$alg
+        sbatch slurm/alg_comparison.sh ALGO=$alg BENCH=$benchmark
     done
 done
