@@ -163,7 +163,7 @@ def _generate_plots(caption, epoch, plotting_data, config):
 # caption: main name of the file
 # index: Epoch_number
 def _save_plot(caption: str, index: str, config: dict):
-    filename = caption if index == -1 else f"{caption}_{index}"
+    filename = caption if index == "" else f"{caption}_{index}"
     if config['wandb']:
         wandb.log({caption: wandb.Image(plt, index)})
         print(f"stored to wandb: {filename}")

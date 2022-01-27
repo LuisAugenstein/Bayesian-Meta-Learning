@@ -113,6 +113,16 @@ def main():
     config['loss_function'] = torch.nn.MSELoss()
     config['train_val_split_function'] = train_val_split_regression
 
+    # check if epochs_to_save is valid
+    if config['epochs_to_save'] > config['num_epochs']:
+        print(f'invalid config: \n' +
+              f'epochs_to_save={config["epochs_to_save"]} needs to be smaller or equal than num_epochs={config["num_epochs"]}. \n' +
+              f'new value epochs_to_save={config["num_epochs"]}. \n')
+        config['epochs_to_save'] = config['num_epochs']
+    
+    config['loss_function'] = torch.nn.MSELoss()
+    config['train_val_split_function'] = train_val_split_regression
+
     config['device'] = torch.device('cuda:0') if torch.cuda.is_available() \
         else torch.device('cpu')
 
@@ -126,7 +136,6 @@ def main():
     }
     runner = runners[config['runner']](config)
     runner.run()
-
 
 def create_save_models_directory(config: dict):
     logdir = os.path.join(config['logdir_base'], 'saved_models',
