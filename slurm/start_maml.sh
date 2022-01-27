@@ -40,6 +40,7 @@ do
                                 --noise_stddev 0.02 \
                                 --num_hidden 2 \
                                 --hidden_size 40 \
+                                --num_episodes 4 \
                                 --num_inner_updates $num_inner_updates \
                                 --logdir_base /pfs/work7/workspace/scratch/utpqw-meta
             done

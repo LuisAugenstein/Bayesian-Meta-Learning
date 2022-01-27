@@ -8,7 +8,7 @@
 # Testing PLATIPUS with params from the paper
 # Not many hyperparams provided, assumed to be similar to MAML
 
-echo 'PLATIPUS started'
+echo 'PLATIPUS NLML Test started'
 
 EPOCHS=50000
 
@@ -21,13 +21,14 @@ done
 
 for benchmark in Sinusoid1D
 do
-    for num_samples in 5 10
+    for num_samples in 5
     do
         for num_inner_updates in 1 10
         do
             for seed in 123
             do
                 python train.py --algorithm platipus \
+                                --runner nlml_runner \
                                 --wandb True \
                                 --num_epochs $EPOCHS \
                                 --benchmark $benchmark \
@@ -36,12 +37,12 @@ do
                                 --seed $seed \
                                 --inner_lr 0.01 \
                                 --meta_lr 0.001 \
-                                --minibatch 20 \
-                                --num_episodes_per_epoch 20 \
+                                --minibatch 6 \
+                                --num_episodes_per_epoch 6 \
+                                --num_test_tasks 20 \
                                 --noise_stddev 0.02 \
                                 --num_hidden 2 \
                                 --hidden_size 40 \
-                                --num_episodes 4 \
                                 --num_inner_updates $num_inner_updates \
                                 --logdir_base /pfs/work7/workspace/scratch/utpqw-meta
             done
