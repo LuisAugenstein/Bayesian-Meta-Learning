@@ -29,8 +29,6 @@ def main():
 
     parser.add_argument("--num_points_per_train_task", default=512, type=int,
                         help='number of datapoints in each meta training task')
-    parser.add_argument("--num_validation_tasks", default=4, type=int,
-                        help='number of tasks used for validation during training')
     parser.add_argument("--num_test_tasks", default=20, type=int,
                         help='number of meta testing tasks')
     parser.add_argument("--num_points_per_test_task", default=512, type=int,
@@ -80,8 +78,8 @@ def main():
     parser.add_argument("--inner_lr", default=0.01, type=float)
     parser.add_argument("--meta_lr", default=1e-3, type=float)
     parser.add_argument("--KL_weight", default=1e-6, type=float)
-    parser.add_argument('--num_episodes', type=int, default=100,
-                        help='Number of episodes used in testing')
+    parser.add_argument('--num_episodes', type=int, default=4,
+                        help='Number of validation tasks used for the MLBaseClass.evaluate() method')
     parser.add_argument("--resume_epoch", default=0,
                         help='0 means fresh training. >0 means training continues from a corresponding stored model.')
     parser.add_argument('--logdir_base', default='.', type=str,
