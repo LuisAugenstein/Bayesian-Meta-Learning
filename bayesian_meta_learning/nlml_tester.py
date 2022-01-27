@@ -16,7 +16,7 @@ def test_neg_log_marginal_likelihood(algo, test_dataloader: DataLoader, config: 
     S = y_pred.shape[1]
     noise_var = config['noise_stddev']**2
     #constant = N/2*np.log(2*np.pi*noise_var) + np.log(S)
-    constant = 0
+    constant = np.log(S)
     for task_index in range(test_dataloader.dataset.n_tasks):
         exponent = torch.norm(y_pred[task_index] - y_test[task_index],
                               dim=1)**2 / (2*noise_var)
