@@ -21,24 +21,24 @@ done
 
 for benchmark in Sinusoid1D
 do
-    for num_samples in 5
+    for alg in maml, platipus, bmaml
     do
         for num_inner_updates in 1 10
         do
             for seed in 123
             do
-                python train.py --algorithm platipus \
+                python train.py --algorithm $alg \
                                 --runner nlml_runner \
                                 --wandb True \
                                 --num_epochs $EPOCHS \
                                 --benchmark $benchmark \
                                 --num_models 10 \
-                                --k_shot $num_samples \
+                                --k_shot 5 \
                                 --seed $seed \
                                 --inner_lr 0.01 \
                                 --meta_lr 0.001 \
-                                --minibatch 6 \
-                                --num_episodes_per_epoch 6 \
+                                --minibatch 20 \
+                                --num_episodes_per_epoch 20 \
                                 --num_test_tasks 20 \
                                 --noise_stddev 0.02 \
                                 --num_hidden 2 \

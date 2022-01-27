@@ -7,7 +7,6 @@ import numpy as np
 
 
 def test_neg_log_marginal_likelihood(algo, test_dataloader: DataLoader, config: dict) -> float:
-    print("Testing is started.")
     model = algo.load_model(
         resume_epoch=config["num_epochs"], hyper_net_class=algo.hyper_net_class, eps_dataloader=test_dataloader)
     nlml_per_task = torch.zeros((test_dataloader.dataset.n_tasks))
@@ -23,7 +22,6 @@ def test_neg_log_marginal_likelihood(algo, test_dataloader: DataLoader, config: 
         nlml_per_task[task_index] = constant - \
             torch.logsumexp(-exponent, dim=0)
     nlml = torch.mean(nlml_per_task).item()
-    print(f"NLML: {nlml}\n")
     return nlml
 
 
