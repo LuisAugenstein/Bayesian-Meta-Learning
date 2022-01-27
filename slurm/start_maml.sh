@@ -9,7 +9,7 @@
 
 echo 'MAML started'
 
-EPOCHS=50000
+EPOCHS=10000
 
 for ARGUMENT in "$@"
 do
@@ -35,12 +35,12 @@ do
                                 --seed $seed \
                                 --inner_lr 0.01 \
                                 --meta_lr 0.001 \
-                                --minibatch 20 \
-                                --num_episodes_per_epoch 20 \
+                                --minibatch 25 \
+                                --num_episodes_per_epoch 25 \
                                 --noise_stddev 0.02 \
                                 --num_hidden 2 \
                                 --hidden_size 40 \
-                                --num_episodes 4 \
+                                --num_episodes 0 \
                                 --num_inner_updates $num_inner_updates \
                                 --logdir_base /pfs/work7/workspace/scratch/utpqw-meta
             done

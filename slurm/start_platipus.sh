@@ -10,7 +10,7 @@
 
 echo 'PLATIPUS started'
 
-EPOCHS=50000
+EPOCHS=10000
 
 for ARGUMENT in "$@"
 do
@@ -31,13 +31,13 @@ do
                                 --wandb True \
                                 --num_epochs $EPOCHS \
                                 --benchmark $benchmark \
-                                --num_models 10 \
+                                --num_models 100 \
                                 --k_shot $num_samples \
                                 --seed $seed \
                                 --inner_lr 0.01 \
                                 --meta_lr 0.001 \
-                                --minibatch 20 \
-                                --num_episodes_per_epoch 20 \
+                                --minibatch 25 \
+                                --num_episodes_per_epoch 25 \
                                 --noise_stddev 0.02 \
                                 --num_hidden 2 \
                                 --hidden_size 40 \
