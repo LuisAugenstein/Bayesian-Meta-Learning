@@ -89,8 +89,8 @@ class MainRunner():
 
     def _test_platipus(self, test_dataloader):
         old_num_models = self.config['num_models']
-        num_runs = 10
-        num_models_array = [5, 10]#, 20, 50, 100]
+        num_runs = 100
+        num_models_array = [5, 10, 20, 50, 100]
         nlmls = np.zeros((len(num_models_array), num_runs))
         mses = np.zeros((len(num_models_array), num_runs))
         print('{:<10} {:<10} {:<15} {:<15}'.format(
