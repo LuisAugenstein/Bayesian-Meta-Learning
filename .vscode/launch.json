@@ -14,8 +14,7 @@
                 "PYTHONWARNINGS": "ignore"
             },
             "args": [
-                "--runner", "main_runner", // main_runner, nlml_runner
-                "--algorithm", "maml", // maml, platipus, bmaml, or baseline
+                "--algorithm", "bmaml", // maml, platipus, bmaml, or baseline
                 "--k_shot", "5",
                 "--num_episodes_per_epoch", "2", // equals number of training tasks
                 "--num_episodes", "1",
