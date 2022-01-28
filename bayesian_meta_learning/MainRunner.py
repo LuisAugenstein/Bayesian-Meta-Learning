@@ -1,6 +1,6 @@
 import os
 from bayesian_meta_learning import visualizer
-from bayesian_meta_learning.nlml_tester import test_neg_log_marginal_likelihood
+from bayesian_meta_learning.model_tester import calculate_loss_metrics
 from bayesian_meta_learning.benchmark.benchmark_dataloader import create_benchmark_dataloaders
 import wandb
 import numpy as np
@@ -29,9 +29,9 @@ class MainRunner():
         }
         self.algo = algorithms[config['algorithm']](config)
         if self.config['wandb']:
-            wandb.define_metric(name="nlml_test/run_id")
-            wandb.define_metric(name="nlml_test/*",
-                                step_metric="nlml_test/run_id")
+            wandb.define_metric(name="evaluation/run_id")
+            wandb.define_metric(name="evaluation/*",
+                                step_metric="evaluation/run_id")
         return
 
     def run(self) -> None:
@@ -57,14 +57,16 @@ class MainRunner():
             if self.config['algorithm'] == 'platipus':
                 self._test_platipus(test_dataloader)
             else:
-                nlml = test_neg_log_marginal_likelihood(
+                nlml, mse = calculate_loss_metrics(
                     self.algo, test_dataloader, self.config)
                 if(self.config['wandb']):
                     wandb.log({
-                        'nlml_test/run_id': 1,
-                        'nlml_test/loss': nlml
+                        'evaluation/run_id': 1,
+                        'evaluation/nlml': nlml,
+                        'evaluation/mse': mse
                     })
-                print(f"Test-NLML: {nlml} \n")
+                print(f"Test-NLML: {nlml}")
+                print(f"Test-MSE: {mse}")
 
         # # visualize the dataset (training, validation and testing)
         print("Visualization is started.")
@@ -87,27 +89,38 @@ class MainRunner():
 
     def _test_platipus(self, test_dataloader):
         old_num_models = self.config['num_models']
-        num_runs = 100
-        means = []
-        stds = []
-        num_models_array = [5, 10, 20, 50, 100]
-        for num_models in num_models_array:
-            nlml = [float] * num_runs
+        num_runs = 10
+        num_models_array = [5, 10]#, 20, 50, 100]
+        nlmls = np.zeros((len(num_models_array), num_runs))
+        mses = np.zeros((len(num_models_array), num_runs))
+        print('{:<10} {:<10} {:<15} {:<15}'.format(
+            'num_models', 'run_id', 'NLML', 'MSE'))
+        for model_id, num_models in enumerate(num_models_array):
             for run_id in range(num_runs):
                 self.algo.config['num_models'] = num_models
                 self.config['num_models'] = num_models
-                nlml[run_id] = test_neg_log_marginal_likelihood(
+                nlml, mse = calculate_loss_metrics(
                     self.algo, test_dataloader, self.config)
                 if(self.config['wandb']):
                     wandb.log({
-                        'nlml_test/run_id': run_id,
-                        f'nlml_test/loss_num_models_{num_models}': nlml[run_id]
+                        'evaluation/run_id': run_id,
+                        f'evaluation/nlml_num_models_{num_models}': nlml,
+                        f'evaluation/mse_num_models_{num_models}': mse
                     })
-                print(f"{num_models}_{run_id+1}: {np.round(nlml[run_id], 4)}")
-            means.append(np.round(np.mean(nlml), 4))
-            stds.append(np.round(np.std(nlml), 4))
-        for i, num_models in enumerate(num_models_array):
-            print(f"Test-NLML_{num_models}: {means[i]} +- {stds[i]}")
+                print('{:<10} {:<10} {:<15} {:<15}'.format(num_models, run_id+1,
+                      np.round(nlml, 4), np.round(mse, 4)))
+                nlmls[model_id, run_id] = nlml
+                mses[model_id, run_id] = mse
+        print('\nAverage and std_dev over all runs')
+        print('{:<10} {:<30} {:<30}'.format('num_models', 'NLML', 'MSE'))
+        for model_id, num_models in enumerate(num_models_array):
+            nlml = np.round(np.mean(nlmls[model_id]), 4)
+            nlml_std = np.round(np.std(nlmls[model_id]), 4)
+            mse = np.round(np.mean(mses[model_id]), 4)
+            mse_std = np.round(np.std(mses[model_id]), 4)
+            nlml_string = f'{nlml} +- {nlml_std}'
+            mse_string = f'{mse} +- {mse_std}'
+            print('{:<10} {:<30} {:<30}'.format(num_models, nlml_string, mse_string))
         print("")
         # restore num_models
         self.algo.config['num_models'] = old_num_models

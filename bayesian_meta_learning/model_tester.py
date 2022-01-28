@@ -4,26 +4,28 @@ from torch.utils.data.dataloader import DataLoader
 from torch import Tensor
 from typing import Tuple
 import numpy as np
-import wandb
 
 
-def test_neg_log_marginal_likelihood(algo, test_dataloader: DataLoader, config: dict) -> float:
+def calculate_loss_metrics(algo, test_dataloader: DataLoader, config: dict) -> Tuple[float, float]:
     model = algo.load_model(
         resume_epoch=config["num_epochs"], hyper_net_class=algo.hyper_net_class, eps_dataloader=test_dataloader)
-    nlml_per_task = torch.zeros((test_dataloader.dataset.n_tasks))
     y_pred, y_test = _predict_all_tasks(algo, model, test_dataloader, config)
-    N = y_pred.shape[2]
-    S = y_pred.shape[1]
-    noise_var = config['noise_stddev']**2
-    #constant = N/2*np.log(2*np.pi*noise_var) + np.log(S)
-    constant = np.log(S)
-    for task_index in range(test_dataloader.dataset.n_tasks):
-        exponent = torch.norm(y_pred[task_index] - y_test[task_index],
-                              dim=1)**2 / (2*noise_var)
-        nlml_per_task[task_index] = constant - \
-            torch.logsumexp(-exponent, dim=0)
-    nlml = torch.mean(nlml_per_task).item()
-    return nlml
+    nlml = _calculate_neg_log_marginal_likelihood(
+        y_pred, y_test, torch.tensor(config['noise_stddev']))
+    mse = torch.nn.MSELoss()
+    mse_loss = mse(y_pred, y_test).item()
+    return nlml, mse_loss
+
+
+def _calculate_neg_log_marginal_likelihood(y_pred: torch.Tensor, y_test: torch.Tensor, noise_stddev: torch.Tensor) -> float:
+    T = y_pred.shape[0]  # num tasks
+    S = y_pred.shape[1]  # num model samples
+    N = y_pred.shape[2]  # num datapoints
+    gaussian = torch.distributions.Normal(y_pred, noise_stddev)
+    log_prob = torch.sum(gaussian.log_prob(y_test), dim=2)
+    nlml_per_task = (np.log(S) - torch.logsumexp(log_prob, dim=1)) / N
+    nlml = torch.sum(nlml_per_task) / T
+    return nlml.item()
 
 
 def _predict_all_tasks(algo, model, task_dataloader, config: dict) -> Tuple[Tensor, Tensor]:
