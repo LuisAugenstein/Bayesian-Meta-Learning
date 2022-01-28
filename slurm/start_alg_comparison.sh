@@ -2,7 +2,7 @@
 
 echo 'COMPARISON started'
 
-EPOCHS=10000
+EPOCHS=20000
 
 for ARGUMENT in "$@"
 do

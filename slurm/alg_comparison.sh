@@ -15,7 +15,7 @@ done
 
 python train.py --algorithm $ALGO \
                 --wandb True \
-                --num_epochs 50000 \
+                --num_epochs 20000 \
                 --benchmark $BENCH \
                 --nlml_testing_enabled True \
                 --num_models 10 \
