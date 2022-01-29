@@ -4,10 +4,10 @@ from torch.utils.data.dataloader import DataLoader
 from torch import Tensor
 from typing import Tuple
 import numpy as np
+import wandb
 
 
 def test_neg_log_marginal_likelihood(algo, test_dataloader: DataLoader, config: dict) -> float:
-    print("Testing is started.")
     model = algo.load_model(
         resume_epoch=config["num_epochs"], hyper_net_class=algo.hyper_net_class, eps_dataloader=test_dataloader)
     nlml_per_task = torch.zeros((test_dataloader.dataset.n_tasks))
@@ -23,7 +23,6 @@ def test_neg_log_marginal_likelihood(algo, test_dataloader: DataLoader, config: 
         nlml_per_task[task_index] = constant - \
             torch.logsumexp(-exponent, dim=0)
     nlml = torch.mean(nlml_per_task).item()
-    print(f"NLML: {nlml}\n")
     return nlml
 
 
@@ -45,9 +44,10 @@ def _predict_all_tasks(algo, model, task_dataloader, config: dict) -> Tuple[Tens
         # adapt model and predict test set
         phi = algo.adaptation(x_train_t[:, None], y_train_t[:, None], model)
         y_pred_t = algo.prediction(x_test_t[:, None], phi, model)
+
         if config['algorithm'] == 'platipus' or config['algorithm'] == 'bmaml':
             # platipus/bmaml return no tensor but a list of S tensors
-            y_pred_t = torch.stack(y_pred)
+            y_pred_t = torch.stack(y_pred_t)
         y_pred[task_index] = y_pred_t.squeeze()
         y_test[task_index] = y_test_t
     return y_pred, y_test

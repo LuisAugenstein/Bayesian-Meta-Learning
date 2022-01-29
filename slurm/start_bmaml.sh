@@ -12,7 +12,6 @@
 echo 'BMAML started'
 
 EPOCHS=100000
-EPOCHS_TO_STORE=10000
 
 for ARGUMENT in "$@"
 do

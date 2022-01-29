@@ -3,8 +3,7 @@ import numpy as np
 import os
 import argparse
 import pathlib
-from bayesian_meta_learning.runner.MainRunner import MainRunner
-from bayesian_meta_learning.runner.NlmlRunner import NlmlRunner
+from bayesian_meta_learning.MainRunner import MainRunner
 from few_shot_meta_learning._utils import train_val_split_regression
 
 # --------------------------------------------------
@@ -16,8 +15,6 @@ def main():
     parser = argparse.ArgumentParser(description='Setup variables')
 
     # Own arguments
-    parser.add_argument("--runner", default='main_runner', type=str,
-                        help='main_runner, nlml_runner')
     parser.add_argument("--noise_stddev", default=0.02, type=float,
                         help='standard deviation of the white gaussian noise added to the data targets y')
     parser.add_argument("--seed", default=123, type=int,
@@ -27,12 +24,8 @@ def main():
     parser.add_argument("--seed_offset_test", default=12345, type=int,
                         help='data generation seed for the meta testing task')
 
-    parser.add_argument("--num_train_tasks", default=16, type=int,
-                        help='number of meta training tasks')
     parser.add_argument("--num_points_per_train_task", default=512, type=int,
                         help='number of datapoints in each meta training task')
-    parser.add_argument("--num_validation_tasks", default=4, type=int,
-                        help='number of tasks used for validation during training')
     parser.add_argument("--num_test_tasks", default=20, type=int,
                         help='number of meta testing tasks')
     parser.add_argument("--num_points_per_test_task", default=512, type=int,
@@ -46,23 +39,27 @@ def main():
     parser.add_argument("--advance_leader", default=10, type=int,
                         help='number of training steps the leader is ahead of the chaser(s). Only relevant for bmaml-chaser')
 
+    parser.add_argument("--nlml_testing_enabled", default=False, type=bool,
+                        help="whether to calculate neg log marginal likelihood or not.")
     parser.add_argument("--reuse_models", default=False, type=bool,
                         help='Specifies if a saved state should be used if found or if the model should be trained from start.')
     parser.add_argument("--normalize_benchmark", default=True, type=bool)
 
     parser.add_argument("--wandb", default=False, type=bool,
                         help="Specifies if logs should be written to WandB")
-    parser.add_argument("--num_visualization_tasks", default=4, type=int,
+    parser.add_argument("--num_visualization_tasks", default=6, type=int,
                         help='number of randomly chosen meta testing tasks that are used for visualization')
     parser.add_argument("--y_plotting_resolution", default=512, type=int,
                         help="number of discrete y-axis points to evaluate for visualization")
+    parser.add_argument("--epochs_to_save", default=1000, type=int,
+                        help="number of epochs between saving the model")
 
     # fsml arguments
     parser.add_argument("--benchmark", default='Sinusoid1D',
                         help='possible values are Sinusoid1D, Affine1D, Quadratic1D, SinusoidAffine1D')
     parser.add_argument("--num_ways", default=1, type=int,
                         help='d_y dimension of targets')
-    parser.add_argument("--k_shot", default=1, type=int,
+    parser.add_argument("--k_shot", default=5, type=int,
                         help='number of datapoints in the context set (needs to be less than points_per_train_task)')
 
     parser.add_argument("--algorithm", default='maml',
@@ -70,21 +67,21 @@ def main():
     parser.add_argument("--network_architecture", default="FcNet")
     parser.add_argument("--num_epochs", default=5, type=int,
                         help='number of training epochs. one epoch corresponds to one meta update for theta. model is stored all 500 epochs')
-    parser.add_argument('--num_episodes_per_epoch', default=10000, type=int,
-                        help='Number of minibatches the model is adapted on in every meta iteration. If -1, trained once on every task (every task ends up in one minibatch).')
-    parser.add_argument("--num_models", default=5, type=int,
+    parser.add_argument('--num_episodes_per_epoch', default=20, type=int,
+                        help='Number of meta train tasks. should be a multiple of minibatch')
+    parser.add_argument("--num_models", default=10, type=int,
                         help='number of models (phi) we sample from the posterior in the end for evaluation. irrelevant for maml')
     parser.add_argument('--minibatch', default=20, type=int,
                         help='Minibatch of episodes (tasks) to update meta-parameters')
-    parser.add_argument('--minibatch_print', default=10, type=int,
-                        help='number of minibatches between each validation printing')
-    parser.add_argument("--num_inner_updates", default=5, type=int,
+    parser.add_argument('--minibatch_print', default=1, type=int,
+                        help='number of minibatches between each validation plotting to wandb')
+    parser.add_argument("--num_inner_updates", default=1, type=int,
                         help='number of SGD steps during adaptation')
     parser.add_argument("--inner_lr", default=0.01, type=float)
     parser.add_argument("--meta_lr", default=1e-3, type=float)
     parser.add_argument("--KL_weight", default=1e-6, type=float)
-    parser.add_argument('--num_episodes', type=int, default=100,
-                        help='Number of episodes used in testing')
+    parser.add_argument('--num_episodes', type=int, default=4,
+                        help='Number of validation tasks used for the MLBaseClass.evaluate() method')
     parser.add_argument("--resume_epoch", default=0,
                         help='0 means fresh training. >0 means training continues from a corresponding stored model.')
     parser.add_argument('--logdir_base', default='.', type=str,
@@ -100,7 +97,31 @@ def main():
     for key in args.__dict__:
         config[key] = args.__dict__[key]
 
+    # check if minibatch is valid
+    if config['minibatch'] > config['num_episodes_per_epoch']:
+        print(f'invalid config: \n' +
+              f'minibatch={config["minibatch"]} needs to be smaller than num_episodes_per_epoch={config["num_episodes_per_epoch"]}. \n' +
+              f'new value minibatch={config["num_episodes_per_epoch"]}. \n')
+        config['minibatch'] = config['num_episodes_per_epoch']
+    
+    # check if minibatch_print is valid
     config['minibatch_print'] *= config['minibatch']
+    if config['minibatch_print'] > config['num_episodes_per_epoch']:
+        print(f'invalid config: \n' +
+              f'minibatch_print={config["minibatch"]} needs to be smaller than num_episodes_per_epoch={config["num_episodes_per_epoch"]}. \n' +
+              f'new value minibatch_print={config["num_episodes_per_epoch"]}. \n')
+        config['minibatch_print'] = config['num_episodes_per_epoch']
+    
+    config['loss_function'] = torch.nn.MSELoss()
+    config['train_val_split_function'] = train_val_split_regression
+
+    # check if epochs_to_save is valid
+    if config['epochs_to_save'] > config['num_epochs']:
+        print(f'invalid config: \n' +
+              f'epochs_to_save={config["epochs_to_save"]} needs to be smaller or equal than num_epochs={config["num_epochs"]}. \n' +
+              f'new value epochs_to_save={config["num_epochs"]}. \n')
+        config['epochs_to_save'] = config['num_epochs']
+    
     config['loss_function'] = torch.nn.MSELoss()
     config['train_val_split_function'] = train_val_split_regression
 
@@ -110,20 +131,9 @@ def main():
     # create directory tree to store models and plots
     create_save_models_directory(config)
 
-    # If specified, make every task appear in one minibtach. Make the optimizer train once
-    # on every minibtach in each meta iteration
-    if config['num_episodes_per_epoch'] == -1:
-        config['num_episodes_per_epoch'] = int(
-            config['num_train_tasks'] / config['minibatch'])
-
-    # choose a Runner and start the run
-    runners = {
-        'main_runner': MainRunner,
-        'nlml_runner': NlmlRunner
-    }
-    runner = runners[config['runner']](config)
+    # start the run
+    runner = MainRunner(config)
     runner.run()
-
 
 def create_save_models_directory(config: dict):
     logdir = os.path.join(config['logdir_base'], 'saved_models',

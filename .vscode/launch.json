@@ -16,13 +16,12 @@
             "args": [
                 "--runner", "main_runner", // main_runner, nlml_runner
                 "--algorithm", "maml", // maml, platipus, bmaml, or baseline
-                "--num_episodes_per_epoch", "100",
                 "--k_shot", "5",
-                "--minibatch", "1",
-                "--num_train_tasks", "2",
-                "--num_validation_tasks", "1",
+                "--num_episodes_per_epoch", "2", // equals number of training tasks
+                "--num_episodes", "1",
                 "--num_test_tasks", "1",
-                "--reuse_models", "True"
+                "--epochs_to_save", "5",
+                "--num_epochs", "10",
             ]
         },
         {
@@ -65,10 +64,10 @@
                 // changeable parameters
                 "--algorithm", "maml", // maml, platipus, bmaml, or baseline
                 "--num_inner_updates", "10000", // 0 for initial model, 10000 for many adaptations
-                "--num_train_tasks", "1",
+                "--num_episodes_per_epoch", "1",
                 // don't change parameters below
                 "--k_shot", "80",
-                "--num_validation_tasks", "0",
+                "--num_episodes", "0",
                 "--num_test_tasks", "0",
                 "--num_epochs", "0",
             ]

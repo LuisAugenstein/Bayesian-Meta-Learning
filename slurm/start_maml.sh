@@ -11,6 +11,7 @@ echo 'MAML started'
 
 EPOCHS=1
 
+
 for ARGUMENT in "$@"
 do
     KEY=$(echo $ARGUMENT | cut -f1 -d=)
@@ -25,6 +26,7 @@ do
         for num_inner_updates in 1
         do
             for inner_lr in 0.01 0.001
+
             do
                 let num_points = k_shot * 2
                 python train.py --algorithm maml \
@@ -43,6 +45,7 @@ do
                                 --noise_stddev 0.1 \
                                 --num_hidden 2 \
                                 --hidden_size 40 \
+                                --num_episodes 4 \
                                 --num_inner_updates $num_inner_updates \
                                 --logdir_base /pfs/work7/workspace/scratch/utpqw-meta
             done
