@@ -2,7 +2,7 @@
 #SBATCH --ntasks=1
 #SBATCH --partition=single
 #SBATCH --mem=16000
-#SBATCH --time=8:00:00
+#SBATCH --time=24:00:00
 #SBATCH --parsable
 
 # Testing MAML with params from the paper
