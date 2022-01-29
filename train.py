@@ -35,6 +35,9 @@ def main():
                         help='number of hidden layers if using a fully connceted network')
     parser.add_argument("--hidden_size", default=40, type=int,
                         help='hidden layer size if using a fully connected network')
+                        
+    parser.add_argument("--advance_leader", default=10, type=int,
+                        help='number of training steps the leader is ahead of the chaser(s). Only relevant for bmaml-chaser')
 
     parser.add_argument("--nlml_testing_enabled", default=False, type=bool,
                         help="whether to calculate neg log marginal likelihood or not.")
