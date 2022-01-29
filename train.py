@@ -3,6 +3,8 @@ import numpy as np
 import os
 import argparse
 import pathlib
+import uuid
+
 from bayesian_meta_learning.MainRunner import MainRunner
 from few_shot_meta_learning._utils import train_val_split_regression
 
@@ -35,7 +37,7 @@ def main():
                         help='number of hidden layers if using a fully connceted network')
     parser.add_argument("--hidden_size", default=40, type=int,
                         help='hidden layer size if using a fully connected network')
-                        
+
     parser.add_argument("--advance_leader", default=10, type=int,
                         help='number of training steps the leader is ahead of the chaser(s). Only relevant for bmaml-chaser')
 
@@ -103,7 +105,7 @@ def main():
               f'minibatch={config["minibatch"]} needs to be smaller than num_episodes_per_epoch={config["num_episodes_per_epoch"]}. \n' +
               f'new value minibatch={config["num_episodes_per_epoch"]}. \n')
         config['minibatch'] = config['num_episodes_per_epoch']
-    
+
     # check if minibatch_print is valid
     config['minibatch_print'] *= config['minibatch']
     if config['minibatch_print'] > config['num_episodes_per_epoch']:
@@ -111,9 +113,6 @@ def main():
               f'minibatch_print={config["minibatch"]} needs to be smaller than num_episodes_per_epoch={config["num_episodes_per_epoch"]}. \n' +
               f'new value minibatch_print={config["num_episodes_per_epoch"]}. \n')
         config['minibatch_print'] = config['num_episodes_per_epoch']
-    
-    config['loss_function'] = torch.nn.MSELoss()
-    config['train_val_split_function'] = train_val_split_regression
 
     # check if epochs_to_save is valid
     if config['epochs_to_save'] > config['num_epochs']:
@@ -121,34 +120,44 @@ def main():
               f'epochs_to_save={config["epochs_to_save"]} needs to be smaller or equal than num_epochs={config["num_epochs"]}. \n' +
               f'new value epochs_to_save={config["num_epochs"]}. \n')
         config['epochs_to_save'] = config['num_epochs']
-    
+
+    # create directory tree to store models and plots
+    # If wandb is disabled, save the config file into the directory
+    create_save_models_directory(config)
+
     config['loss_function'] = torch.nn.MSELoss()
     config['train_val_split_function'] = train_val_split_regression
 
     config['device'] = torch.device('cuda:0') if torch.cuda.is_available() \
         else torch.device('cpu')
 
-    # create directory tree to store models and plots
-    create_save_models_directory(config)
-
     # start the run
     runner = MainRunner(config)
     runner.run()
 
-def create_save_models_directory(config: dict):
-    logdir = os.path.join(config['logdir_base'], 'saved_models',
-                          config['algorithm'].lower(),
-                          config['network_architecture'],
-                          config['benchmark'],
-                          f"{config['k_shot']}-shot",
-                          f"{config['num_models']}-models",
-                          f"{config['seed']}_{config['seed_offset']}_{config['seed_offset_test']}"
-                          )
 
-    config['logdir'] = os.path.join(logdir, 'models')
-    config['logdir_plots'] = os.path.join(logdir, 'plots')
-    pathlib.Path(config['logdir']).mkdir(parents=True, exist_ok=True)
-    pathlib.Path(config['logdir_plots']).mkdir(parents=True, exist_ok=True)
+def create_save_models_directory(config: dict):
+    if config['wandb']:
+        identifier = uuid.uuid1()
+        logdir = os.path.join(
+            config['logdir_base'], 'saved_models', str(identifier))
+
+        config['logdir'] = logdir
+        config['logdir_plots'] = logdir
+        pathlib.Path(config['logdir']).mkdir(parents=True, exist_ok=True)
+    else:
+        logdir = os.path.join(config['logdir_base'], 'saved_models',
+                              config['algorithm'].lower(),
+                              config['network_architecture'],
+                              config['benchmark'],
+                              f"{config['k_shot']}-shot",
+                              f"{config['num_models']}-models",
+                              )
+        config['logdir_plots'] = os.path.join(logdir, 'plots')
+        pathlib.Path(config['logdir_plots']).mkdir(parents=True, exist_ok=True)
+
+        config['logdir'] = os.path.join(logdir, 'models')
+        pathlib.Path(config['logdir']).mkdir(parents=True, exist_ok=True)
 
 
 if __name__ == "__main__":
