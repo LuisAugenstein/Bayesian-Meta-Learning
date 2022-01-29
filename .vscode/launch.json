@@ -24,6 +24,32 @@
                 "--nlml_testing_enabled", "True",
             ]
         },
+        {
+            "name": "BMAML Chaser",
+            "type": "python",
+            "request": "launch",
+            "program": "train.py",
+            "console": "integratedTerminal",
+            "env": {
+                "PYTHONWARNINGS": "ignore"
+            },
+            "args": [
+                "--runner", "main_runner", // main_runner, nlml_runner
+                "--algorithm", "bmaml-chaser", // maml, platipus, bmaml, or baseline
+                "--num_episodes_per_epoch", "100",
+                "--num_models", "10",
+                "--k_shot", "10",
+                "--minibatch", "10",
+                "--num_hidden", "3",
+                "--num_episodes_per_epoch", "100",
+                "--inner_lr", "0.01",
+                "--meta_lr", "0.01",
+                "--num_train_tasks", "100",
+                "--num_validation_tasks", "100",
+                "--num_inner_updates", "1",
+                "--reuse_models", "False"
+            ]
+        },
         //SANITY CHECKS (test trivial examples on which the results should be really good)
         {
             "name": "Adaptation Test",

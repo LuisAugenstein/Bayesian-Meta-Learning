@@ -9,7 +9,8 @@
 
 echo 'MAML started'
 
-EPOCHS=10000
+EPOCHS=1
+
 
 for ARGUMENT in "$@"
 do
@@ -20,24 +21,28 @@ done
 
 for benchmark in Sinusoid1D
 do
-    for num_samples in 10 5
+    for k_shot in 10 5
     do
-        for num_inner_updates in 1 10
+        for num_inner_updates in 1
         do
-            for seed in 123
+            for inner_lr in 0.01 0.001
+
             do
+                let num_points = k_shot * 2
                 python train.py --algorithm maml \
                                 --wandb True \
+                                --nlml_testing_enabled True \
                                 --num_epochs $EPOCHS \
+                                --epochs_to_save 1 \
+                                --num_episodes_per_epoch 20000 \
                                 --benchmark $benchmark \
                                 --num_models 1 \
-                                --k_shot $num_samples \
-                                --seed $seed \
-                                --inner_lr 0.01 \
+                                --k_shot $k_shot \
+                                --num_points_per_train_tasks $num_points \
+                                --inner_lr $inner_lr \
                                 --meta_lr 0.001 \
                                 --minibatch 25 \
-                                --num_episodes_per_epoch 25 \
-                                --noise_stddev 0.02 \
+                                --noise_stddev 0.1 \
                                 --num_hidden 2 \
                                 --hidden_size 40 \
                                 --num_episodes 4 \

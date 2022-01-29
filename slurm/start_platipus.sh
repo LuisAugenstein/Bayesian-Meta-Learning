@@ -10,7 +10,7 @@
 
 echo 'PLATIPUS started'
 
-EPOCHS=10000
+EPOCHS=1
 
 for ARGUMENT in "$@"
 do
@@ -21,29 +21,38 @@ done
 
 for benchmark in Sinusoid1D
 do
-    for num_samples in 5 10
+    for k_shot in 5
     do
-        for num_inner_updates in 1 10
+        for num_inner_updates in 5
         do
-            for seed in 123
+            for noise_std_dev in 0.3 0.1
             do
-                python train.py --algorithm platipus \
-                                --wandb True \
-                                --num_epochs $EPOCHS \
-                                --benchmark $benchmark \
-                                --num_models 100 \
-                                --k_shot $num_samples \
-                                --seed $seed \
-                                --inner_lr 0.01 \
-                                --meta_lr 0.001 \
-                                --minibatch 25 \
-                                --num_episodes_per_epoch 25 \
-                                --noise_stddev 0.02 \
-                                --num_hidden 2 \
-                                --hidden_size 40 \
-                                --num_episodes 4 \
-                                --num_inner_updates $num_inner_updates \
-                                --logdir_base /pfs/work7/workspace/scratch/utpqw-meta
+                for num_models in 4 10
+                do
+                    for kl_weight in 1.5 0.15 0.01 0.0001
+                    do
+                        let num_points = k_shot * 2
+                        python train.py --algorithm platipus \
+                                        --wandb True \
+                                        --nlml_testing_enabled True \
+                                        --num_epochs $EPOCHS \
+                                        --epochs_to_save 1 \
+                                        --num_episodes_per_epoch 20000 \
+                                        --benchmark $benchmark \
+                                        --num_models 10 \
+                                        --k_shot $k_shot \
+                                        --KL_weight $kl_weight \
+                                        --num_points_per_train_tasks $num_points \
+                                        --inner_lr 0.01 \
+                                        --meta_lr 0.001 \
+                                        --minibatch 25 \
+                                        --noise_stddev $noise_std_dev \
+                                        --num_hidden 3 \
+                                        --hidden_size 100 \
+                                        --num_inner_updates $num_inner_updates \
+                                        --logdir_base /pfs/work7/workspace/scratch/utpqw-meta
+                    done
+                done
             done
         done
     done
