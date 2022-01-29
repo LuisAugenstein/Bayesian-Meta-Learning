@@ -15,7 +15,7 @@ def main():
     parser = argparse.ArgumentParser(description='Setup variables')
 
     # Own arguments
-    parser.add_argument("--noise_stddev", default=0.02, type=float,
+    parser.add_argument("--noise_stddev", default=0.1, type=float,
                         help='standard deviation of the white gaussian noise added to the data targets y')
     parser.add_argument("--seed", default=123, type=int,
                         help='general seed for everything but data generation')
@@ -40,7 +40,7 @@ def main():
                         help="whether to calculate neg log marginal likelihood or not.")
     parser.add_argument("--reuse_models", default=False, type=bool,
                         help='Specifies if a saved state should be used if found or if the model should be trained from start.')
-    parser.add_argument("--normalize_benchmark", default=True, type=bool)
+    parser.add_argument("--normalize_benchmark", default=False, type=bool)
 
     parser.add_argument("--wandb", default=False, type=bool,
                         help="Specifies if logs should be written to WandB")

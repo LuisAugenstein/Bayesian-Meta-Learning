@@ -14,13 +14,14 @@
                 "PYTHONWARNINGS": "ignore"
             },
             "args": [
-                "--algorithm", "bmaml", // maml, platipus, bmaml, or baseline
+                "--algorithm", "maml", // maml, platipus, bmaml, or baseline
                 "--k_shot", "5",
                 "--num_episodes_per_epoch", "2", // equals number of training tasks
                 "--num_episodes", "1",
                 "--num_test_tasks", "1",
                 "--epochs_to_save", "5",
                 "--num_epochs", "10",
+                "--nlml_testing_enabled", "True",
             ]
         },
         //SANITY CHECKS (test trivial examples on which the results should be really good)

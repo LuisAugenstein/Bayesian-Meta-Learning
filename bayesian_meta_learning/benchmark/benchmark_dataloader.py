@@ -5,13 +5,18 @@ from bayesian_meta_learning.benchmark.sinusoid_affine_benchmark import SinusoidA
 from mtutils.mtutils import BM_DICT
 from metalearning_benchmarks.benchmarks.util import normalize_benchmark
 
+
 def create_benchmark_dataloaders(config: dict):
     bm_meta, bm_val, bm_test = _create_benchmarks(config)
-    train_data_loader = DataLoader(BenchmarkDataset(bm_meta), shuffle=True)
-    val_data_loader = DataLoader(BenchmarkDataset(bm_val), shuffle=True)
-    test_data_loader = DataLoader(BenchmarkDataset(bm_test), shuffle=True)
+    train_data_loader = DataLoader(BenchmarkDataset(
+        bm_meta, config['normalize_benchmark']), shuffle=True)
+    val_data_loader = DataLoader(BenchmarkDataset(
+        bm_val,  config['normalize_benchmark']), shuffle=True)
+    test_data_loader = DataLoader(BenchmarkDataset(
+        bm_test,  config['normalize_benchmark']), shuffle=True)
     return train_data_loader, val_data_loader, test_data_loader
-    
+
+
 def _create_benchmarks(config: dict):
     # extend benchmark dict
     BM_DICT['SinusoidAffine1D'] = SinusoidAffineBenchmark
@@ -40,13 +45,6 @@ def _create_benchmarks(config: dict):
         seed_x=config["seed_offset_test"] + 1,
         seed_noise=config["seed_offset_test"] + 2,
     )
-    if config['normalize_benchmark']:
-        if bm_meta.n_task > 0:
-            bm_meta = normalize_benchmark(bm_meta)
-        if bm_val.n_task > 0:
-            bm_val = normalize_benchmark(bm_val)
-        if bm_test.n_task > 0:
-            bm_test = normalize_benchmark(bm_test)
     return bm_meta, bm_val, bm_test
 
 

@@ -18,6 +18,11 @@ def plot_tasks_initially(caption, algo, task_dataloader: DataLoader, config):
     plotting_data = [None] * task_dataloader.dataset.n_tasks
     y_pred, y_test, x_test, y_train, x_train = _predict_all_tasks(
         algo, model, task_dataloader, config)
+    # denormalize data
+    _, y_pred = task_dataloader.dataset.denormalize(y=y_pred)
+    x_test, y_test = task_dataloader.dataset.denormalize(x=x_test, y=y_test)
+    x_train, y_train = task_dataloader.dataset.denormalize(x=x_train, y=y_train)
+    # generate plotting data
     for task_index in range(task_dataloader.dataset.n_tasks):
         plotting_data[task_index] = {
             'x_train': x_train[task_index].squeeze().cpu().detach().numpy(),
@@ -38,6 +43,11 @@ def plot_task_results(caption, epoch, algo, task_dataloader, config):
         [config['num_visualization_tasks'], task_dataloader.dataset.n_tasks])
     y_pred, y_test, x_test, y_train, x_train = _predict_all_tasks(
         algo, model, task_dataloader, config)
+    # denormalize data
+    _, y_pred = task_dataloader.dataset.denormalize(y=y_pred)
+    x_test, y_test = task_dataloader.dataset.denormalize(x=x_test, y=y_test)
+    x_train, y_train = task_dataloader.dataset.denormalize(x=x_train, y=y_train)
+    # create plotting data
     plotting_data = [None] * num_visualization_tasks
     for task_index in range(num_visualization_tasks):
         R = config['y_plotting_resolution']
@@ -162,6 +172,8 @@ def _generate_plots(caption, epoch, plotting_data, config):
 
 # caption: main name of the file
 # index: Epoch_number
+
+
 def _save_plot(caption: str, index: str, config: dict):
     filename = caption if index == "" else f"{caption}_{index}"
     if config['wandb']:

@@ -10,6 +10,8 @@ def calculate_loss_metrics(algo, test_dataloader: DataLoader, config: dict) -> T
     model = algo.load_model(
         resume_epoch=config["num_epochs"], hyper_net_class=algo.hyper_net_class, eps_dataloader=test_dataloader)
     y_pred, y_test = _predict_all_tasks(algo, model, test_dataloader, config)
+    _, y_pred = test_dataloader.dataset.denormalize(y=y_pred)
+    _, y_test = test_dataloader.dataset.denormalize(y=y_test)
     nlml = _calculate_neg_log_marginal_likelihood(
         y_pred, y_test, torch.tensor(config['noise_stddev']))
     mse = torch.nn.MSELoss()
