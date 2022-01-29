@@ -2,7 +2,7 @@
 #SBATCH --ntasks=1
 #SBATCH --partition=single
 #SBATCH --mem=32000
-#SBATCH --time=16:00:00
+#SBATCH --time=24:00:00
 #SBATCH --parsable
 
 # Testing BMAML with params from the paper
