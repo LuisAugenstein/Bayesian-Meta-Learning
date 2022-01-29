@@ -23,50 +23,50 @@ done
 
 for benchmark in Sinusoid1D
 do
-    for num_samples in 5 10
+    for k_shot in 5
     do
-        for particles in 5 10
+        for particles in 10
         do
-            for seed in 1234 4321 9999 889 441 588 7741
+            for inner_lr in 0.01 0.001
             do
+                let num_points = k_shot * 2
+
                 python train.py --algorithm bmaml \
                                 --wandb True \
-                                --num_epochs 100000 \
+                                --nlml_testing_enabled True \
+                                --num_epochs 10000 \
                                 --num_train_tasks 100 \
                                 --benchmark $benchmark \
                                 --num_models $particles \
-                                --k_shot $num_samples \
+                                --k_shot $k_shot \
+                                --num_inner_updates 5 \
                                 --num_episodes_per_epoch $EPOCHS_TO_STORE \
-                                --seed $seed \
-                                --seed_offset $seed \
-                                --seed_offset_test $seed \
-                                --inner_lr 0.01 \
-                                --meta_lr 0.01 \
+                                --num_points_per_train_tasks $num_points \
+                                --inner_lr $inner_lr \
+                                --meta_lr 0.001 \
                                 --minibatch 10 \
-                                --noise_stddev 0.3 \
+                                --noise_stddev 0.05 \
                                 --num_hidden 3 \
                                 --hidden_size 40 \
-                                --num_inner_updates 1 \
                                 --logdir_base /pfs/work7/workspace/scratch/utpqw-meta
 
                 python train.py --algorithm bmaml \
                                 --wandb True \
-                                --num_epochs 100000 \
+                                --nlml_testing_enabled True \
+                                --num_epochs 1000 \
                                 --num_train_tasks 1000 \
                                 --benchmark $benchmark \
                                 --num_models $particles \
-                                --k_shot $num_samples \
+                                --k_shot $k_shot \
+                                --num_inner_updates 5 \
                                 --num_episodes_per_epoch $EPOCHS_TO_STORE \
-                                --seed $seed \
-                                --seed_offset $seed \
-                                --seed_offset_test $seed \
-                                --inner_lr 0.01 \
-                                --meta_lr 0.01 \
+                                --num_points_per_train_tasks $num_points \
+                                --inner_lr $inner_lr \
+                                --meta_lr 0.001 \
                                 --minibatch 10 \
-                                --noise_stddev 0.3 \
+                                --noise_stddev 0.05 \
                                 --num_hidden 3 \
                                 --hidden_size 40 \
-                                --num_inner_updates 1 \
                                 --logdir_base /pfs/work7/workspace/scratch/utpqw-meta
 
             done
