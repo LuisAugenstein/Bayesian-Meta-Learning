@@ -15,6 +15,7 @@ def calculate_loss_metrics(algo, test_dataloader: DataLoader, config: dict) -> T
     nlml = _calculate_neg_log_marginal_likelihood(
         y_pred, y_test, torch.tensor(config['noise_stddev']))
     mse = torch.nn.MSELoss()
+    y_test = torch.broadcast_to(y_test, y_pred.shape)
     mse_loss = mse(y_pred, y_test).item()
     return nlml, mse_loss
 
