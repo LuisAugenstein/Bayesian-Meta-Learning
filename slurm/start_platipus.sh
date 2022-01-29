@@ -31,7 +31,7 @@ do
                 do
                     for kl_weight in 1.5 0.15 0.01 0.0001
                     do
-                        let num_points = k_shot * 2
+			let num_points=$((k_shot * 2))
                         python train.py --algorithm platipus \
                                         --wandb True \
                                         --nlml_testing_enabled True \
@@ -42,7 +42,7 @@ do
                                         --num_models 10 \
                                         --k_shot $k_shot \
                                         --KL_weight $kl_weight \
-                                        --num_points_per_train_tasks $num_points \
+                                        --num_points_per_train_task $num_points \
                                         --inner_lr 0.01 \
                                         --meta_lr 0.001 \
                                         --minibatch 25 \

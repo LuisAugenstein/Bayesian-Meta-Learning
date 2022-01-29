@@ -28,7 +28,7 @@ do
             for inner_lr in 0.01 0.001
 
             do
-                let num_points = k_shot * 2
+		let num_points=$((k_shot * 2))
                 python train.py --algorithm maml \
                                 --wandb True \
                                 --nlml_testing_enabled True \
@@ -38,7 +38,7 @@ do
                                 --benchmark $benchmark \
                                 --num_models 1 \
                                 --k_shot $k_shot \
-                                --num_points_per_train_tasks $num_points \
+                                --num_points_per_train_task $num_points \
                                 --inner_lr $inner_lr \
                                 --meta_lr 0.001 \
                                 --minibatch 25 \

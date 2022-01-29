@@ -28,19 +28,17 @@ do
         do
             for inner_lr in 0.01 0.001
             do
-                let num_points = k_shot * 2
-
+		let num_points=$((k_shot * 2))
                 python train.py --algorithm bmaml \
                                 --wandb True \
                                 --nlml_testing_enabled True \
                                 --num_epochs 10000 \
-                                --num_train_tasks 100 \
                                 --benchmark $benchmark \
                                 --num_models $particles \
                                 --k_shot $k_shot \
                                 --num_inner_updates 5 \
-                                --num_episodes_per_epoch $EPOCHS_TO_STORE \
-                                --num_points_per_train_tasks $num_points \
+                                --num_episodes_per_epoch 100 \
+                                --num_points_per_train_task $num_points \
                                 --inner_lr $inner_lr \
                                 --meta_lr 0.001 \
                                 --minibatch 10 \
@@ -53,12 +51,11 @@ do
                                 --wandb True \
                                 --nlml_testing_enabled True \
                                 --num_epochs 1000 \
-                                --num_train_tasks 1000 \
                                 --benchmark $benchmark \
                                 --num_models $particles \
                                 --k_shot $k_shot \
                                 --num_inner_updates 5 \
-                                --num_episodes_per_epoch $EPOCHS_TO_STORE \
+                                --num_episodes_per_epoch 1000 \
                                 --num_points_per_train_tasks $num_points \
                                 --inner_lr $inner_lr \
                                 --meta_lr 0.001 \
