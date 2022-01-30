@@ -1,4 +1,3 @@
-from cgi import test
 import os
 import wandb
 import torch
@@ -58,7 +57,6 @@ def plot_task_results(caption, epoch, algo, task_dataloader, config):
         y_resolution = torch.linspace(start, end, R)
         y_broadcasted = torch.broadcast_to(y_resolution, (1, N, R))
         y_p = torch.broadcast_to(y_pred[task_index, :, :, None], (S, N, 1))
-
         # move to cpu
         y_p = y_p.cpu()
         y_broadcasted = y_broadcasted.cpu()
