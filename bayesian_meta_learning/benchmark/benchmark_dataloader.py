@@ -1,4 +1,3 @@
-from random import shuffle
 from torch.utils.data.dataloader import DataLoader
 from bayesian_meta_learning.benchmark.benchmark_dataset import BenchmarkDataset
 from bayesian_meta_learning.benchmark.sinusoid_affine_benchmark import SinusoidAffineBenchmark
