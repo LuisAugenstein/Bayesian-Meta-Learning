@@ -42,7 +42,7 @@ do
                                                     num_points_per_train_task=$num_points \
                                                     inner_lr=0.01 \
                                                     meta_lr=0.001 \
-                                                    minibatch 25 \
+                                                    minibatch=25 \
                                                     noise_stddev=$noise_std_dev \
                                                     num_hidden=3 \
                                                     hidden_size=100 \
