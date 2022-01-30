@@ -15,7 +15,7 @@ def plot_tasks_initially(caption, algo, task_dataloader: DataLoader, config):
     model = model = algo.load_model(
         resume_epoch=0.1, hyper_net_class=algo.hyper_net_class, eps_dataloader=task_dataloader)
     num_visualization_tasks = np.min([task_dataloader.dataset.n_tasks, 20])
-    y_pred, y_test, x_test, y_train, x_train = _predict_all_tasks(
+    y_pred, y_test, x_test, y_train, x_train = _predict_all_tasks(num_visualization_tasks, 
         algo, model, task_dataloader, config)
     # denormalize data
     _, y_pred = task_dataloader.dataset.denormalize(y=y_pred)
