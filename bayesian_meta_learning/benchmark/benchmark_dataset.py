@@ -9,10 +9,10 @@ from metalearning_benchmarks.benchmarks.base_benchmark import MetaLearningBenchm
 
 
 class BenchmarkDataset(torch.utils.data.Dataset):
-    def __init__(self, benchmark: MetaLearningBenchmark, normalize:bool) -> None:
+    def __init__(self, benchmark: MetaLearningBenchmark, normalize_enabled:bool) -> None:
         super().__init__()
         self.n_tasks = benchmark.n_task
-        self.normalize
+        self.normalize_eanbled = normalize_enabled
         # calculate normalizers
         x = torch.zeros((benchmark.n_task, benchmark.n_datapoints_per_task))
         y = torch.zeros((benchmark.n_task, benchmark.n_datapoints_per_task))
@@ -39,7 +39,7 @@ class BenchmarkDataset(torch.utils.data.Dataset):
         return [x, y]
 
     def normalize(self, x: typing.Optional[torch.Tensor] = None, y: typing.Optional[torch.Tensor] = None) -> typing.Tuple[torch.Tensor, torch.Tensor]:
-        if not self.normalize:
+        if not self.normalize_eanbled:
             return x,y
         normalized_x = x
         if x is not None and not (self.normalizers["std_x"] == 0.0).any():
@@ -50,7 +50,7 @@ class BenchmarkDataset(torch.utils.data.Dataset):
         return normalized_x, normalized_y
 
     def denormalize(self, x: typing.Optional[torch.Tensor] = None, y: typing.Optional[torch.Tensor] = None) -> typing.Tuple[torch.Tensor, torch.Tensor]:
-        if not self.normalize:
+        if not self.normalize_eanbled:
             return x,y
         denormalized_x = x
         if x is not None and not (self.normalizers["std_x"] == 0.0).any():
