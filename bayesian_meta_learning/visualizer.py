@@ -10,22 +10,18 @@ from torch.utils.data.dataloader import DataLoader
 
 
 def plot_tasks_initially(caption, algo, task_dataloader: DataLoader, config):
-    print("Plotting itially")
     if task_dataloader.dataset.n_tasks == 0:
         return
     model = model = algo.load_model(
         resume_epoch=0.1, hyper_net_class=algo.hyper_net_class, eps_dataloader=task_dataloader)
-    print("Loading models")
     plotting_data = [None] * task_dataloader.dataset.n_tasks
     y_pred, y_test, x_test, y_train, x_train = _predict_all_tasks(
         algo, model, task_dataloader, config)
     # denormalize data
-    print("Denormalizing")
     _, y_pred = task_dataloader.dataset.denormalize(y=y_pred)
     x_test, y_test = task_dataloader.dataset.denormalize(x=x_test, y=y_test)
     x_train, y_train = task_dataloader.dataset.denormalize(x=x_train, y=y_train)
     # generate plotting data
-    print("Generating plots")
     for task_index in range(task_dataloader.dataset.n_tasks):
         plotting_data[task_index] = {
             'x_train': x_train[task_index].squeeze().cpu().detach().numpy(),
@@ -40,7 +36,6 @@ def plot_tasks_initially(caption, algo, task_dataloader: DataLoader, config):
 def plot_task_results(caption, epoch, algo, task_dataloader, config):
     if task_dataloader.dataset.n_tasks == 0:
         return
-    print("Load model 2")
     model = model = algo.load_model(
         resume_epoch=epoch, hyper_net_class=algo.hyper_net_class, eps_dataloader=task_dataloader)
     num_visualization_tasks = np.min(
@@ -48,12 +43,10 @@ def plot_task_results(caption, epoch, algo, task_dataloader, config):
     y_pred, y_test, x_test, y_train, x_train = _predict_all_tasks(
         algo, model, task_dataloader, config)
     # denormalize data
-    print("Denormalize 2")
     _, y_pred = task_dataloader.dataset.denormalize(y=y_pred)
     x_test, y_test = task_dataloader.dataset.denormalize(x=x_test, y=y_test)
     x_train, y_train = task_dataloader.dataset.denormalize(x=x_train, y=y_train)
     # create plotting data
-    print("Plotting 2")
     plotting_data = [None] * num_visualization_tasks
     for task_index in range(num_visualization_tasks):
         R = config['y_plotting_resolution']
@@ -64,13 +57,11 @@ def plot_task_results(caption, epoch, algo, task_dataloader, config):
         y_resolution = torch.linspace(start, end, R)
         y_broadcasted = torch.broadcast_to(y_resolution, (1, N, R))
         y_p = torch.broadcast_to(y_pred[task_index, :, :, None], (S, N, 1))
-        print("Moving to GPU")
         # move to cpu
         y_p = y_p.cpu()
         y_broadcasted = y_broadcasted.cpu()
         y_resolution = y_resolution.cpu()
 
-        print("Genrating Heatmap")
         # generate heat_map with density values at the discretized points
         noise_var = config['noise_stddev']**2
         heat_maps = torch.exp(-(y_broadcasted-y_p)**2/(
