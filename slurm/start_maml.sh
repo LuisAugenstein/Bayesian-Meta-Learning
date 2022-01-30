@@ -9,7 +9,7 @@
 
 echo 'MAML started'
 
-EPOCHS=1
+EPOCHS=10
 
 
 for ARGUMENT in "$@"
