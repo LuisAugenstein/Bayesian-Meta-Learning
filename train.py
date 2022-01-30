@@ -41,6 +41,8 @@ def main():
     parser.add_argument("--advance_leader", default=10, type=int,
                         help='number of training steps the leader is ahead of the chaser(s). Only relevant for bmaml-chaser')
 
+    parser.add_argument("--num_inner_updates_testing", default=5, type=int,
+                        help="number of inner update steps used during testing")
     parser.add_argument("--nlml_testing_enabled", default=False, type=bool,
                         help="whether to calculate neg log marginal likelihood or not.")
     parser.add_argument("--reuse_models", default=False, type=bool,

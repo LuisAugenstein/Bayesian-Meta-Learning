@@ -45,7 +45,10 @@ class MainRunner():
         # Only train if retraining is requested or no model with the current config exists
         if not self.config['reuse_models'] or not os.path.exists(checkpoint_path):
             self.algo.train(train_dataloader, val_dataloader)
-
+        
+        # prepare config for testing
+        self.config['num_inner_updates'] = self.config['num_inner_updates_testing']
+        self.algo.config['num_inner_updates'] = self.config['num_inner_updates_testing']
         # set seeds again after training
         torch.manual_seed(self.config['seed'])
         torch.cuda.manual_seed(self.config['seed'])
