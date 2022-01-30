@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH --ntasks=1
 #SBATCH --partition=single
-#SBATCH --mem=16000
+#SBATCH --mem=64000
 #SBATCH --time=24:00:00
 #SBATCH --parsable
 
@@ -31,26 +31,24 @@ do
                 do
                     for kl_weight in 1.5 0.15 0.01 0.0001
                     do
-			let num_points=$((k_shot * 2))
-                        python train.py --algorithm platipus \
-                                        --wandb True \
-                                        --nlml_testing_enabled True \
-                                        --num_epochs $EPOCHS \
-                                        --epochs_to_save 1 \
-                                        --num_episodes_per_epoch 20000 \
-                                        --benchmark $benchmark \
-                                        --num_models 10 \
-                                        --k_shot $k_shot \
-                                        --KL_weight $kl_weight \
-                                        --num_points_per_train_task $num_points \
-                                        --inner_lr 0.01 \
-                                        --meta_lr 0.001 \
-                                        --minibatch 25 \
-                                        --noise_stddev $noise_std_dev \
-                                        --num_hidden 3 \
-                                        --hidden_size 100 \
-                                        --num_inner_updates $num_inner_updates \
-                                        --logdir_base /pfs/work7/workspace/scratch/utpqw-meta
+            			let num_points=$((k_shot * 2))
+                        sbatch slurm/start_job.sh   algorithm=platipus \
+                                                    num_epochs=$EPOCHS \
+                                                    num_episodes_per_epoch=60000 \
+                                                    epochs_to_save=1 \
+                                                    benchmark=$benchmark \
+                                                    num_models=10 \
+                                                    k_shot=$k_shot \
+                                                    num_points_per_train_task=$num_points \
+                                                    inner_lr=0.01 \
+                                                    meta_lr=0.001 \
+                                                    minibatch=25 \
+                                                    noise_stddev=$noise_std_dev \
+                                                    num_hidden=3 \
+                                                    hidden_size=100 \
+                                                    num_episodes=4 \
+                                                    num_inner_updates=$num_inner_updates \
+                                                    KL_weight=$kl_weight
                     done
                 done
             done

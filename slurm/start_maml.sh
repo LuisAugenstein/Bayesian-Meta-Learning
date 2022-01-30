@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH --ntasks=1
 #SBATCH --partition=single
-#SBATCH --mem=16000
+#SBATCH --mem=64000
 #SBATCH --time=24:00:00
 #SBATCH --parsable
 
@@ -26,28 +26,25 @@ do
         for num_inner_updates in 1
         do
             for inner_lr in 0.01 0.001
-
             do
-		let num_points=$((k_shot * 2))
-                python train.py --algorithm maml \
-                                --wandb True \
-                                --nlml_testing_enabled True \
-                                --num_epochs $EPOCHS \
-                                --epochs_to_save 1 \
-                                --num_episodes_per_epoch 20000 \
-                                --benchmark $benchmark \
-                                --num_models 1 \
-                                --k_shot $k_shot \
-                                --num_points_per_train_task $num_points \
-                                --inner_lr $inner_lr \
-                                --meta_lr 0.001 \
-                                --minibatch 25 \
-                                --noise_stddev 0.1 \
-                                --num_hidden 2 \
-                                --hidden_size 40 \
-                                --num_episodes 4 \
-                                --num_inner_updates $num_inner_updates \
-                                --logdir_base /pfs/work7/workspace/scratch/utpqw-meta
+        		let num_points=$((k_shot * 2))
+                sbatch slurm/start_job.sh   algorithm=maml \
+                                            num_epochs=$EPOCHS \
+                                            num_episodes_per_epoch=20000 \
+                                            epochs_to_save=1 \
+                                            benchmark=$benchmark \
+                                            num_models=1 \
+                                            k_shot=$k_shot \
+                                            num_points_per_train_task=$num_points \
+                                            inner_lr=$inner_lr \
+                                            meta_lr=0.001 \
+                                            minibatch=25 \
+                                            noise_stddev=0.1 \
+                                            num_hidden=2 \
+                                            hidden_size=40 \
+                                            num_episodes=4 \
+                                            num_inner_updates=$num_inner_updates \
+                                            KL_weight=1e-6
             done
         done
     done

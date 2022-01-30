@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH --ntasks=1
 #SBATCH --partition=single
-#SBATCH --mem=32000
+#SBATCH --mem=64000
 #SBATCH --time=24:00:00
 #SBATCH --parsable
 
@@ -28,42 +28,42 @@ do
         do
             for inner_lr in 0.01 0.001
             do
-		let num_points=$((k_shot * 2))
-                python train.py --algorithm bmaml \
-                                --wandb True \
-                                --nlml_testing_enabled True \
-                                --num_epochs 10000 \
-                                --benchmark $benchmark \
-                                --num_models $particles \
-                                --k_shot $k_shot \
-                                --num_inner_updates 5 \
-                                --num_episodes_per_epoch 100 \
-                                --num_points_per_train_task $num_points \
-                                --inner_lr $inner_lr \
-                                --meta_lr 0.001 \
-                                --minibatch 10 \
-                                --noise_stddev 0.05 \
-                                --num_hidden 3 \
-                                --hidden_size 40 \
-                                --logdir_base /pfs/work7/workspace/scratch/utpqw-meta
+        		let num_points=$((k_shot * 2))
+                sbatch slurm/start_job.sh   algorithm=bmaml \
+                                            num_epochs=10000 \
+                                            num_episodes_per_epoch=100 \
+                                            epochs_to_save=1000 \
+                                            benchmark=$benchmark \
+                                            num_models=$particles \
+                                            k_shot=$k_shot \
+                                            num_points_per_train_task=$num_points \
+                                            inner_lr=$inner_lr \
+                                            meta_lr=0.001 \
+                                            minibatch=10 \
+                                            noise_stddev=0.05 \
+                                            num_hidden=3 \
+                                            hidden_size=40 \
+                                            num_episodes=4 \
+                                            num_inner_updates=5 \
+                                            KL_weight=1e-6 
 
-                python train.py --algorithm bmaml \
-                                --wandb True \
-                                --nlml_testing_enabled True \
-                                --num_epochs 1000 \
-                                --benchmark $benchmark \
-                                --num_models $particles \
-                                --k_shot $k_shot \
-                                --num_inner_updates 5 \
-                                --num_episodes_per_epoch 1000 \
-                                --num_points_per_train_tasks $num_points \
-                                --inner_lr $inner_lr \
-                                --meta_lr 0.001 \
-                                --minibatch 10 \
-                                --noise_stddev 0.05 \
-                                --num_hidden 3 \
-                                --hidden_size 40 \
-                                --logdir_base /pfs/work7/workspace/scratch/utpqw-meta
+                sbatch slurm/start_job.sh   algorithm=bmaml \
+                                            num_epochs=1000 \
+                                            num_episodes_per_epoch=1000 \
+                                            epochs_to_save=1000 \
+                                            benchmark=$benchmark \
+                                            num_models=$particles \
+                                            k_shot=$k_shot \
+                                            num_points_per_train_task=$num_points \
+                                            inner_lr=$inner_lr \
+                                            meta_lr=0.001 \
+                                            minibatch=10 \
+                                            noise_stddev=0.05 \
+                                            num_hidden=3 \
+                                            hidden_size=40 \
+                                            num_episodes=4 \
+                                            num_inner_updates=5 \
+                                            KL_weight=1e-6 
 
             done
         done

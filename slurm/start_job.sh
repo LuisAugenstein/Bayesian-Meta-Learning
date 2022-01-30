@@ -1,8 +1,8 @@
 #!/bin/bash
 #SBATCH --ntasks=1
 #SBATCH --partition=single
-#SBATCH --mem=16000
-#SBATCH --time=8:00:00
+#SBATCH --mem=32000
+#SBATCH --time=24:00:00
 #SBATCH --parsable
 
 echo 'Job started'
@@ -19,21 +19,24 @@ done
 
 echo $BENCHMARK
 
-for num_samples in 1 2 4 8 1000
-do
-        for seed in 1234 4321 9999
-        do
 
-		python train.py --algorithm $ALGORITHM \
-		                --wandb True \
-		                --num_epochs $EPOCHS \
-		                --benchmark $BENCHMARK \
-		                --num_models $NUM_MODELS \
-		                --k_shot $num_samples \
-		                --num_episodes_per_epoch $EPOCHS_TO_STORE \
-		                --seed $seed \
-		                --seed_offset $seed \
-		                --seed_offset_test $seed \
-				        --logdir_base /pfs/work7/workspace/scratch/utpqw-meta
-	done
-done
+python -W ignore train.py 	--algorithm $algorithm \
+							--nlml_testing_enabled True \
+							--wandb True \
+							--logdir_base /pfs/work7/workspace/scratch/utpqw-meta \
+							--num_epochs $num_epochs \
+							--num_episodes_per_epoch $num_episodes_per_epoch \
+							--epochs_to_save $epochs_to_save \
+							--benchmark $benchmark \
+							--num_models $num_models \
+							--k_shot $k_shot \
+							--num_points_per_train_task $num_points_per_train_task \
+							--inner_lr $inner_lr \
+							--meta_lr $meta_lr \
+							--minibatch $minibatch \
+							--noise_stddev $noise_stddev \
+							--num_hidden $num_hidden \
+							--hidden_size $hidden_size \
+							--num_episodes $num_episodes \
+							--num_inner_updates $num_inner_updates \
+							--KL_weight $KL_weight
