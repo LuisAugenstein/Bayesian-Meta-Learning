@@ -40,7 +40,7 @@ class MainRunner():
             self.config)
 
         checkpoint_path = os.path.join(
-            self.config['logdir'], f"Epoch_{self.config['num_models']}.pt")
+            self.config['logdir'], f"Epoch_{self.config['num_epochs']}.pt")
 
         # Only train if retraining is requested or no model with the current config exists
         if not self.config['reuse_models'] or not os.path.exists(checkpoint_path):
