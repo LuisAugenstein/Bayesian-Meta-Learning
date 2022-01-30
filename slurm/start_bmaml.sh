@@ -28,7 +28,7 @@ do
         do
             for inner_lr in 0.01 0.001
             do
-        		let num_points=$((k_shot * 2))
+        	let num_points=$((k_shot * 2))
                 sbatch slurm/start_job.sh   algorithm=bmaml \
                                             num_epochs=10000 \
                                             num_episodes_per_epoch=100 \
@@ -36,7 +36,7 @@ do
                                             benchmark=$benchmark \
                                             num_models=$particles \
                                             k_shot=$k_shot \
-                                            num_points_per_train_task=$num_points \
+                                            num_points_per_train_task=50 \
                                             inner_lr=$inner_lr \
                                             meta_lr=0.001 \
                                             minibatch=10 \
@@ -54,7 +54,7 @@ do
                                             benchmark=$benchmark \
                                             num_models=$particles \
                                             k_shot=$k_shot \
-                                            num_points_per_train_task=$num_points \
+                                            num_points_per_train_task=50 \
                                             inner_lr=$inner_lr \
                                             meta_lr=0.001 \
                                             minibatch=10 \

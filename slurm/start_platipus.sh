@@ -10,7 +10,7 @@
 
 echo 'PLATIPUS started'
 
-EPOCHS=1
+EPOCHS=5
 
 for ARGUMENT in "$@"
 do
@@ -31,7 +31,7 @@ do
                 do
                     for kl_weight in 1.5 0.15 0.01 0.0001
                     do
-            			let num_points=$((k_shot * 2))
+            	        let num_points=$((k_shot * 2))
                         sbatch slurm/start_job.sh   algorithm=platipus \
                                                     num_epochs=$EPOCHS \
                                                     num_episodes_per_epoch=60000 \
@@ -39,7 +39,7 @@ do
                                                     benchmark=$benchmark \
                                                     num_models=10 \
                                                     k_shot=$k_shot \
-                                                    num_points_per_train_task=$num_points \
+                                                    num_points_per_train_task=50 \
                                                     inner_lr=0.01 \
                                                     meta_lr=0.001 \
                                                     minibatch=25 \

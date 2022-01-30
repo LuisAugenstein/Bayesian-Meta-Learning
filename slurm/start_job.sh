@@ -24,6 +24,7 @@ python -W ignore train.py 	--algorithm $algorithm \
 							--nlml_testing_enabled True \
 							--wandb True \
 							--logdir_base /pfs/work7/workspace/scratch/utpqw-meta \
+							--seed 9999 \
 							--num_epochs $num_epochs \
 							--num_episodes_per_epoch $num_episodes_per_epoch \
 							--epochs_to_save $epochs_to_save \
