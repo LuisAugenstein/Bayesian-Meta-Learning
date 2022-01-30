@@ -31,13 +31,13 @@ do
                 do
                     for kl_weight in 1.5 0.15 0.01 0.0001
                     do
-			let num_points=$((k_shot * 2))
+            			let num_points=$((k_shot * 2))
                         python -W ignore train.py --algorithm platipus \
                                         --wandb True \
                                         --nlml_testing_enabled True \
                                         --num_epochs $EPOCHS \
                                         --epochs_to_save 1 \
-                                        --num_episodes_per_epoch 20000 \
+                                        --num_episodes_per_epoch 60000 \
                                         --benchmark $benchmark \
                                         --num_models 10 \
                                         --k_shot $k_shot \
