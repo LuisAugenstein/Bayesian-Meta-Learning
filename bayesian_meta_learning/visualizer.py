@@ -14,7 +14,6 @@ def plot_tasks_initially(caption, algo, task_dataloader: DataLoader, config):
         return
     model = model = algo.load_model(
         resume_epoch=0.1, hyper_net_class=algo.hyper_net_class, eps_dataloader=task_dataloader)
-    plotting_data = [None] * task_dataloader.dataset.n_tasks
     y_pred, y_test, x_test, y_train, x_train = _predict_all_tasks(
         algo, model, task_dataloader, config)
     # denormalize data
@@ -22,7 +21,8 @@ def plot_tasks_initially(caption, algo, task_dataloader: DataLoader, config):
     x_test, y_test = task_dataloader.dataset.denormalize(x=x_test, y=y_test)
     x_train, y_train = task_dataloader.dataset.denormalize(x=x_train, y=y_train)
     # generate plotting data
-    for task_index in range(task_dataloader.dataset.n_tasks):
+    plotting_data = [None] * np.min([task_dataloader.dataset.n_tasks, 20])
+    for task_index in range(len(plotting_data)):
         plotting_data[task_index] = {
             'x_train': x_train[task_index].squeeze().cpu().detach().numpy(),
             'y_train': y_train[task_index].squeeze().cpu().detach().numpy(),
