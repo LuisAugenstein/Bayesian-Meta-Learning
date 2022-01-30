@@ -32,23 +32,23 @@ do
                     for kl_weight in 1.5 0.15 0.01 0.0001
                     do
             			let num_points=$((k_shot * 2))
-                        sbatch start_job.sh     --algorithm=platipus \
-                                                --num_epochs=$EPOCHS \
-                                                --num_episodes_per_epoch=60000 \
-                                                --epochs_to_save=1 \
-                                                --benchmark=$benchmark \
-                                                --num_models=10 \
-                                                --k_shot=$k_shot \
-                                                --num_points_per_train_task=$num_points \
-                                                --inner_lr=0.01 \
-                                                --meta_lr=0.001 \
-                                                --minibatch 25 \
-                                                --noise_stddev=$noise_std_dev \
-                                                --num_hidden=3 \
-                                                --hidden_size=100 \
-                                                --num_episodes=4 \
-                                                --num_inner_updates=$num_inner_updates \
-                                                --KL_weight=$kl_weight \
+                        sbatch slurm/start_job.sh     --algorithm=platipus \
+                                                    --num_epochs=$EPOCHS \
+                                                    --num_episodes_per_epoch=60000 \
+                                                    --epochs_to_save=1 \
+                                                    --benchmark=$benchmark \
+                                                    --num_models=10 \
+                                                    --k_shot=$k_shot \
+                                                    --num_points_per_train_task=$num_points \
+                                                    --inner_lr=0.01 \
+                                                    --meta_lr=0.001 \
+                                                    --minibatch 25 \
+                                                    --noise_stddev=$noise_std_dev \
+                                                    --num_hidden=3 \
+                                                    --hidden_size=100 \
+                                                    --num_episodes=4 \
+                                                    --num_inner_updates=$num_inner_updates \
+                                                    --KL_weight=$kl_weight \
                     done
                 done
             done
