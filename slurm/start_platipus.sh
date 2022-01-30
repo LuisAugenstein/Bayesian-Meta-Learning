@@ -48,7 +48,7 @@ do
                                                     hidden_size=100 \
                                                     num_episodes=4 \
                                                     num_inner_updates=$num_inner_updates \
-                                                    KL_weight=$kl_weight \
+                                                    KL_weight=$kl_weight
                     done
                 done
             done
