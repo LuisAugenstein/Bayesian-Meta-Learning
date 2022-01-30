@@ -1,8 +1,8 @@
 #!/bin/bash
 #SBATCH --ntasks=1
 #SBATCH --partition=single
-#SBATCH --mem=16000
-#SBATCH --time=8:00:00
+#SBATCH --mem=32000
+#SBATCH --time=24:00:00
 #SBATCH --parsable
 
 echo 'Job started'
@@ -23,6 +23,7 @@ echo $BENCHMARK
 python -W ignore train.py 	--algorithm $algorithm \
 							--nlml_testing_enabled True \
 							--wandb True \
+							--logdir_base /pfs/work7/workspace/scratch/utpqw-meta \
 							--num_epochs $num_epochs \
 							--num_episodes_per_epoch $num_episodes_per_epoch \
 							--epochs_to_save $epochs_to_save \
@@ -38,5 +39,4 @@ python -W ignore train.py 	--algorithm $algorithm \
 							--hidden_size $hidden_size \
 							--num_episodes $num_episodes \
 							--num_inner_updates $num_inner_updates \
-							--KL_weight $KL_weight \	
-							--logdir_base /pfs/work7/workspace/scratch/utpqw-meta
+							--KL_weight $KL_weight
