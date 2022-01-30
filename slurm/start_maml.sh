@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH --ntasks=1
 #SBATCH --partition=single
-#SBATCH --mem=16000
+#SBATCH --mem=64000
 #SBATCH --time=24:00:00
 #SBATCH --parsable
 
@@ -29,7 +29,7 @@ do
 
             do
 		let num_points=$((k_shot * 2))
-                python train.py --algorithm maml \
+                python -W ignore train.py --algorithm maml \
                                 --wandb True \
                                 --nlml_testing_enabled True \
                                 --num_epochs $EPOCHS \

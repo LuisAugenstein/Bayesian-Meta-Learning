@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH --ntasks=1
 #SBATCH --partition=single
-#SBATCH --mem=32000
+#SBATCH --mem=64000
 #SBATCH --time=24:00:00
 #SBATCH --parsable
 
@@ -29,7 +29,7 @@ do
             for inner_lr in 0.01 0.001
             do
 		let num_points=$((k_shot * 2))
-                python train.py --algorithm bmaml \
+                python -W ignore train.py --algorithm bmaml \
                                 --wandb True \
                                 --nlml_testing_enabled True \
                                 --num_epochs 10000 \
@@ -47,7 +47,7 @@ do
                                 --hidden_size 40 \
                                 --logdir_base /pfs/work7/workspace/scratch/utpqw-meta
 
-                python train.py --algorithm bmaml \
+                python -W ignore train.py --algorithm bmaml \
                                 --wandb True \
                                 --nlml_testing_enabled True \
                                 --num_epochs 1000 \
