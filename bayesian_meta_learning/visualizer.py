@@ -14,15 +14,16 @@ def plot_tasks_initially(caption, algo, task_dataloader: DataLoader, config):
         return
     model = model = algo.load_model(
         resume_epoch=0.1, hyper_net_class=algo.hyper_net_class, eps_dataloader=task_dataloader)
-    plotting_data = [None] * task_dataloader.dataset.n_tasks
-    y_pred, y_test, x_test, y_train, x_train = _predict_all_tasks(
+    num_visualization_tasks = np.min([task_dataloader.dataset.n_tasks, 20])
+    y_pred, y_test, x_test, y_train, x_train = _predict_all_tasks(num_visualization_tasks, 
         algo, model, task_dataloader, config)
     # denormalize data
     _, y_pred = task_dataloader.dataset.denormalize(y=y_pred)
     x_test, y_test = task_dataloader.dataset.denormalize(x=x_test, y=y_test)
     x_train, y_train = task_dataloader.dataset.denormalize(x=x_train, y=y_train)
     # generate plotting data
-    for task_index in range(task_dataloader.dataset.n_tasks):
+    plotting_data = [None] * num_visualization_tasks
+    for task_index in range(num_visualization_tasks):
         plotting_data[task_index] = {
             'x_train': x_train[task_index].squeeze().cpu().detach().numpy(),
             'y_train': y_train[task_index].squeeze().cpu().detach().numpy(),
@@ -40,7 +41,7 @@ def plot_task_results(caption, epoch, algo, task_dataloader, config):
         resume_epoch=epoch, hyper_net_class=algo.hyper_net_class, eps_dataloader=task_dataloader)
     num_visualization_tasks = np.min(
         [config['num_visualization_tasks'], task_dataloader.dataset.n_tasks])
-    y_pred, y_test, x_test, y_train, x_train = _predict_all_tasks(
+    y_pred, y_test, x_test, y_train, x_train = _predict_all_tasks(num_visualization_tasks,
         algo, model, task_dataloader, config)
     # denormalize data
     _, y_pred = task_dataloader.dataset.denormalize(y=y_pred)
@@ -81,7 +82,7 @@ def plot_task_results(caption, epoch, algo, task_dataloader, config):
     _generate_plots(caption, epoch, plotting_data, config)
 
 
-def _predict_all_tasks(algo, model, task_dataloader, config: dict) -> Tuple[Tensor, Tensor, Tensor, Tensor, Tensor]:
+def _predict_all_tasks(n_tasks: int, algo, model, task_dataloader, config: dict) -> Tuple[Tensor, Tensor, Tensor, Tensor, Tensor]:
     S = 1 if config['algorithm'] == 'maml' else config['num_models']
     T = task_dataloader.dataset.n_tasks
     N = task_dataloader.dataset[0][0].shape[0]
@@ -90,7 +91,7 @@ def _predict_all_tasks(algo, model, task_dataloader, config: dict) -> Tuple[Tens
     x_test = torch.zeros((T, 1, N)).to(config['device'])
     x_train = torch.zeros((T, 1, config['k_shot'])).to(config['device'])
     y_train = torch.zeros((T, 1, config['k_shot'])).to(config['device'])
-    for task_index in range(task_dataloader.dataset.n_tasks):
+    for task_index in range(np.min([n_tasks, task_dataloader.dataset.n_tasks])):
         task_data = task_dataloader.dataset[task_index]
         # split the data
         x_test_t, sort_indices = torch.sort(task_data[0])
