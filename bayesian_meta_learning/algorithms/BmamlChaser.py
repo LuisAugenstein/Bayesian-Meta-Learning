@@ -4,6 +4,7 @@ import higher
 import typing
 from tqdm import tqdm
 import wandb
+import pickle
 
 from few_shot_meta_learning.MLBaseClass import MLBaseClass
 from few_shot_meta_learning.HyperNetClasses import EnsembleNet
@@ -18,7 +19,29 @@ class BmamlChaser(MLBaseClass):
 
     def load_model(self, resume_epoch: int, eps_dataloader: torch.utils.data.DataLoader, **kwargs) -> dict:
         maml_temp = Maml(config=self.config)
-        return maml_temp.load_model(resume_epoch=resume_epoch, eps_dataloader=eps_dataloader, **kwargs)
+        model = maml_temp.load_model(
+            resume_epoch=0, eps_dataloader=eps_dataloader, **kwargs)
+       
+        stored_dict = pickle.load(open(self.config['load_dir_bmaml_chaser'], "rb"))
+
+        model['hyper_net'].params = torch.nn.ParameterList(
+            parameters=None)
+
+        for particle_idx in range(self.config['num_models']):
+            params_list = []
+            for layer_idx, shape in enumerate(model['hyper_net'].parameter_shapes):
+                if layer_idx % 2 == 0:
+                    weights_numpy = stored_dict[particle_idx][layer_idx/2+1]['weights']
+                    weights_tensor = torch.from_numpy(weights_numpy)
+                    params_list.append(weights_tensor.reshape(shape))
+                else:
+                    bias_numpy = stored_dict[particle_idx][(layer_idx-1)/2+1]['bias']
+                    bias_tensor = torch.from_numpy(bias_numpy)
+                    params_list.append(bias_tensor.reshape(shape))
+            params_vec = torch.nn.utils.parameters_to_vector(params_list)
+            model['hyper_net'].params.append(parameter=torch.nn.Parameter(data=params_vec))
+        
+        return model
 
     def adaptation(self, x: torch.Tensor, y: torch.Tensor, model: dict, is_leader: bool = False) -> typing.List[higher.patch._MonkeyPatchBase]:
         """"""
@@ -216,7 +239,7 @@ class BmamlChaser(MLBaseClass):
 
                         chasers = []
                         leaders = []
-                        
+
                         # monitoring
                         if (eps_count + 1) % self.config['minibatch_print'] == 0 or \
                            (epoch_id == 0 and (eps_count+1) / self.config['minibatch'] == 0):

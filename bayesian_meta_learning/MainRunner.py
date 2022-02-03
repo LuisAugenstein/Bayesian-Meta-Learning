@@ -7,6 +7,7 @@ import numpy as np
 import torch
 import random
 from bayesian_meta_learning.algorithms.Baseline import Baseline
+from bayesian_meta_learning.algorithms.BmamlChaser import BmamlChaser
 from few_shot_meta_learning.Maml import Maml
 from few_shot_meta_learning.Platipus import Platipus
 from few_shot_meta_learning.Bmaml import Bmaml
@@ -25,7 +26,8 @@ class MainRunner():
             'maml': Maml,
             'bmaml': Bmaml,
             'platipus': Platipus,
-            'baseline': Baseline
+            'baseline': Baseline,
+            'bmaml_chaser': BmamlChaser
         }
         self.algo = algorithms[config['algorithm']](config)
         if self.config['wandb']:
@@ -43,9 +45,9 @@ class MainRunner():
             self.config['logdir'], f"Epoch_{self.config['num_epochs']}.pt")
 
         # Only train if retraining is requested or no model with the current config exists
-        if not self.config['reuse_models'] or not os.path.exists(checkpoint_path):
+        if (not self.config['reuse_models'] or not os.path.exists(checkpoint_path)) and not self.config['algorithm'] == 'bmaml_chaser':
             self.algo.train(train_dataloader, val_dataloader)
-        
+
         # prepare config for testing
         self.config['num_inner_updates'] = self.config['num_inner_updates_testing']
         self.algo.config['num_inner_updates'] = self.config['num_inner_updates_testing']
@@ -123,7 +125,8 @@ class MainRunner():
             mse_std = np.round(np.std(mses[model_id]), 4)
             nlml_string = f'{nlml} +- {nlml_std}'
             mse_string = f'{mse} +- {mse_std}'
-            print('{:<10} {:<30} {:<30}'.format(num_models, nlml_string, mse_string))
+            print('{:<10} {:<30} {:<30}'.format(
+                num_models, nlml_string, mse_string))
         print("")
         # restore num_models
         self.algo.config['num_models'] = old_num_models

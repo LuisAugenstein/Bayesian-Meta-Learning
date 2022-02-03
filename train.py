@@ -17,6 +17,8 @@ def main():
     parser = argparse.ArgumentParser(description='Setup variables')
 
     # Own arguments
+    parser.add_argument("--load_dir_bmaml_chaser", default='bmaml_chaser_models/model_100.pickle', type=str,
+                        help='path to a .pickle file with parameters from bmaml with chaser loss')
     parser.add_argument("--noise_stddev", default=0.1, type=float,
                         help='standard deviation of the white gaussian noise added to the data targets y')
     parser.add_argument("--seed", default=123, type=int,
@@ -67,7 +69,7 @@ def main():
                         help='number of datapoints in the context set (needs to be less than points_per_train_task)')
 
     parser.add_argument("--algorithm", default='maml',
-                        help='possible values are maml, platipus, bmaml and baseline')
+                        help='possible values are maml, platipus, bmaml, baseline and bmaml_chaser')
     parser.add_argument("--network_architecture", default="FcNet")
     parser.add_argument("--num_epochs", default=5, type=int,
                         help='number of training epochs. one epoch corresponds to one meta update for theta. model is stored all 500 epochs')
