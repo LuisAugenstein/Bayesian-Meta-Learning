@@ -1,3 +1,7 @@
 [submodule "few_shot_meta_learning"]
 	path = few_shot_meta_learning
 	url = https://github.com/LuisAugenstein/few_shot_meta_learning
+
+[submodule "bmaml"]
+	path = bmaml
+	url = https://github.com/ju-leon/bmaml.git
