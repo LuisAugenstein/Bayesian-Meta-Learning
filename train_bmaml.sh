@@ -1,4 +1,9 @@
 #!/bin/bash
+#SBATCH --ntasks=1
+#SBATCH --partition=single
+#SBATCH --mem=32000
+#SBATCH --time=24:00:00
+#SBATCH --parsable
 
 num_epochs=10000 
 num_episodes_per_epoch=100 
