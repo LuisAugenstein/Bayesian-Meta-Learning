@@ -5,18 +5,18 @@
 #SBATCH --time=24:00:00
 #SBATCH --parsable
 
-num_epochs=10000 
+num_epochs=3
 num_episodes_per_epoch=100 
 epochs_to_save=1 
 benchmark=Sinusoid1D
-num_models=1 
+num_models=10 
 k_shot=5 
 num_points_per_train_task=50 
 inner_lr=0.001 
 meta_lr=0.001 
 minibatch=10
 noise_stddev=0.1 
-num_hidden=2 
+num_hidden=3 
 hidden_size=40 
 num_episodes=4 
 num_inner_updates=10 
@@ -27,6 +27,8 @@ conda activate bmaml
 
 cd bmaml
 
+#python bmaml_main.py --finite=True --train_total_num_tasks=100 --test_total_num_tasks=100 --num_particles=10 --num_tasks=10 --few_k_shot=5 --val_k_shot=5 --num_epochs=10000
+
 python bmaml_main.py \
     --finite=True \
     --train_total_num_tasks=$num_episodes_per_epoch \
@@ -36,20 +38,21 @@ python bmaml_main.py \
     --few_k_shot=$k_shot \
     --val_k_shot=$k_shot \
     --num_epochs=$num_epochs \
-    --meta_lr=$meta_lr \
     --dim_hidden=$hidden_size \
     --num_layers=$num_hidden \
-    --seed=$seed
-
+    --seed=222 \
+    --meta_lr=$meta_lr
 cd ..
+
+echo "Done with training\n\n\n\n\n\n\n\n"
 
 eval "$(conda shell.bash hook)"
 conda activate meta
 
-python train.py --algorithm bmaml \
+python train.py --algorithm bmaml_chaser \
                 --nlml_testing_enabled True \
                 --wandb True \
-                --logdir_base /pfs/work7/workspace/scratch/utpqw-meta \
+                --logdir_base /Users/leonjungemeyer/Files/Bayesian-Meta-Learning \
                 --num_epochs $num_epochs \
                 --num_episodes_per_epoch $num_episodes_per_epoch \
                 --epochs_to_save $epochs_to_save \
