@@ -1,3 +1,4 @@
+
 #!/bin/bash
 #SBATCH --ntasks=1
 #SBATCH --partition=single
@@ -5,7 +6,7 @@
 #SBATCH --time=24:00:00
 #SBATCH --parsable
 
-num_epochs=3
+num_epochs=1000
 num_episodes_per_epoch=100 
 epochs_to_save=1 
 benchmark=Sinusoid1D
@@ -32,7 +33,7 @@ cd bmaml
 python bmaml_main.py \
     --finite=True \
     --train_total_num_tasks=$num_episodes_per_epoch \
-    --test_total_num_tasks=$100 \
+    --test_total_num_tasks=100 \
     --num_particles=$num_models \
     --num_tasks=$minibatch \
     --few_k_shot=$k_shot \
@@ -52,7 +53,7 @@ conda activate meta
 python train.py --algorithm bmaml_chaser \
                 --nlml_testing_enabled True \
                 --wandb True \
-                --logdir_base /Users/leonjungemeyer/Files/Bayesian-Meta-Learning \
+                --logdir_base pfs/work7/workspace/scratch/utpqw-meta \
                 --num_epochs $num_epochs \
                 --num_episodes_per_epoch $num_episodes_per_epoch \
                 --epochs_to_save $epochs_to_save \
