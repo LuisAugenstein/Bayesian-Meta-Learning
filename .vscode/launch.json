@@ -45,7 +45,7 @@
             },
             "args": [
                 "--runner", "main_runner", // main_runner, nlml_runner
-                "--algorithm", "bmaml-chaser", // maml, platipus, bmaml, or baseline
+                "--algorithm", "bmaml_chaser", // maml, platipus, bmaml, or baseline
                 "--num_episodes_per_epoch", "100",
                 "--num_models", "10",
                 "--k_shot", "10",
