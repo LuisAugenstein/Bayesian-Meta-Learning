@@ -42,10 +42,12 @@ def _predict_all_tasks(algo, model, task_dataloader, config: dict) -> Tuple[Tens
         # split the data
         split_data = config['train_val_split_function'](
             eps_data=task_data, k_shot=config['k_shot'])
+        
         x_train_t = split_data['x_t'].to(config['device'])
         y_train_t = split_data['y_t'].to(config['device'])
         x_test_t = split_data['x_v'].to(config['device'])
         y_test_t = split_data['y_v'].to(config['device'])
+        
         # adapt model and predict test set
         phi = algo.adaptation(x_train_t[:, None], y_train_t[:, None], model)
         y_pred_t = algo.prediction(x_test_t[:, None], phi, model)
