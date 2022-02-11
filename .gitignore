@@ -3,3 +3,5 @@ saved_models
 *.log
 wandb
 *.out
+
+.ipynb_checkpoints
