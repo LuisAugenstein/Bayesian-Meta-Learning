@@ -6,7 +6,7 @@
 #SBATCH --time=24:00:00
 #SBATCH --parsable
 
-num_epochs=1000
+num_epochs=10000
 num_episodes_per_epoch=100 
 epochs_to_save=1 
 benchmark=Sinusoid1D
@@ -56,7 +56,7 @@ python train.py --algorithm bmaml_chaser \
                 --logdir_base pfs/work7/workspace/scratch/utpqw-meta \
                 --num_epochs $num_epochs \
                 --num_episodes_per_epoch $num_episodes_per_epoch \
-                --epochs_to_save $epochs_to_save \
+                --epochs_to_save $num_epochs \
                 --benchmark $benchmark \
                 --num_models $num_models \
                 --k_shot $k_shot \

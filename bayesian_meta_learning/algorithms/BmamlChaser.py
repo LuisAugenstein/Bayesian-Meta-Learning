@@ -52,7 +52,7 @@ class BmamlChaser(MLBaseClass):
         )
 
         q_params = torch.stack(
-            tensors=[p for p in model["hyper_net"].parameters()])
+            tensors=[p for p in model["hyper_net"].parameters()]).to(self.config['device'])
 
         if is_leader:
             steps = self.config["advance_leader"]
@@ -65,11 +65,14 @@ class BmamlChaser(MLBaseClass):
             loss_monitor = 0
             for particle_id in range(self.config["num_models"]):
                 base_net_params = f_hyper_net.forward(i=particle_id)
-
-                logits = model["f_base_net"].forward(x, params=base_net_params)
+                
+                for k in range(len(base_net_params)):
+                    base_net_params[k] = base_net_params[k].cpu()
+                
+                logits = model["f_base_net"].forward(x.cpu(), params=base_net_params)
 
                 loss_temp = self.config['loss_function'](
-                    input=logits, target=y)
+                    input=logits, target=y.cpu())
 
                 loss_monitor += loss_temp.item() / self.config['num_models']
 
@@ -87,7 +90,7 @@ class BmamlChaser(MLBaseClass):
                     )
 
                 distance_NLL[particle_id, :] = torch.nn.utils.parameters_to_vector(
-                    parameters=grads)
+                    parameters=grads).cpu()
 
             # log adaptation
             if self.config['num_inner_updates'] > 500 and ((i+1) % 500 == 0 or i == 0):
