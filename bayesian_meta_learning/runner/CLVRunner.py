@@ -18,13 +18,26 @@ class CLVRunner():
         torch.cuda.manual_seed(config['seed'])
         np.random.seed(config['seed'])
         random.seed(config['seed'])
-        # initialize algorithm to use
-        self.algo = CLVModel(config['logdir'])
         # setup wandb
-        if self.config['wandb']:
+        if (config['wandb']):
+            wandb.init(project="fsml_" + config['algorithm'],
+                       entity="seminar-meta-learning",
+                       config=config)
+            wandb.define_metric(name="meta_train/epoch")
+            wandb.define_metric(name="meta_train/*",
+                                step_metric="meta_train/epoch")
+
+            wandb.define_metric(name="adapt/epoch")
+            wandb.define_metric(name="adapt/*", step_metric="adapt/epoch")
+
+            wandb.define_metric(name="results/sample")
+            wandb.define_metric(name="results/*", step_metric="results/sample")
+            
             wandb.define_metric(name="evaluation/run_id")
             wandb.define_metric(name="evaluation/*",
                                 step_metric="evaluation/run_id")
+        # initialize algorithm to use
+        self.algo = CLVModel(config['logdir'])
         return
 
     def run(self) -> None:
