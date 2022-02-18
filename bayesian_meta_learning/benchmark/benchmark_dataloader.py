@@ -4,7 +4,7 @@ from bayesian_meta_learning.benchmark.sinusoid_affine_benchmark import SinusoidA
 from mtutils.mtutils import BM_DICT
 
 def create_benchmark_dataloaders(config: dict):
-    bm_meta, bm_val, bm_test = _create_benchmarks(config)
+    bm_meta, bm_val, bm_test = create_benchmarks(config)
     train_data_loader = DataLoader(BenchmarkDataset(
         bm_meta, config['normalize_benchmark']), shuffle=True)
     val_data_loader = DataLoader(BenchmarkDataset(
@@ -14,7 +14,7 @@ def create_benchmark_dataloaders(config: dict):
     return train_data_loader, val_data_loader, test_data_loader
 
 
-def _create_benchmarks(config: dict):
+def create_benchmarks(config: dict):
     # extend benchmark dict
     BM_DICT['SinusoidAffine1D'] = SinusoidAffineBenchmark
     # create benchmarks

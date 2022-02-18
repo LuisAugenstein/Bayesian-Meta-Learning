@@ -5,7 +5,8 @@ import argparse
 import pathlib
 import uuid
 
-from bayesian_meta_learning.MainRunner import MainRunner
+from bayesian_meta_learning.runner.MainRunner import MainRunner
+from bayesian_meta_learning.runner.CLVRunner import CLVRunner
 from few_shot_meta_learning._utils import train_val_split_regression
 
 # --------------------------------------------------
@@ -69,7 +70,7 @@ def main():
                         help='number of datapoints in the context set (needs to be less than points_per_train_task)')
 
     parser.add_argument("--algorithm", default='maml',
-                        help='possible values are maml, platipus, bmaml, baseline and bmaml_chaser')
+                        help='possible values are maml, platipus, bmaml, baseline and bmaml_chaser and clv')
     parser.add_argument("--network_architecture", default="FcNet")
     parser.add_argument("--num_epochs", default=5, type=int,
                         help='number of training epochs. one epoch corresponds to one meta update for theta. model is stored all 500 epochs')
@@ -124,6 +125,12 @@ def main():
               f'epochs_to_save={config["epochs_to_save"]} needs to be smaller or equal than num_epochs={config["num_epochs"]}. \n' +
               f'new value epochs_to_save={config["num_epochs"]}. \n')
         config['epochs_to_save'] = config['num_epochs']
+    
+    if config['num_test_tasks'] % config['minibatch'] != 0:
+            print("!!!!!WARNING!!!!! num_test_tasks should be a multiple of minibatch.")
+            print("new Value for num_test_tasks is " +
+                  config['minibatch'])
+            config['num_test_tasks'] = config['minibatch']
 
     # create directory tree to store models and plots
     # If wandb is disabled, save the config file into the directory
@@ -136,7 +143,10 @@ def main():
         else torch.device('cpu')
 
     # start the run
-    runner = MainRunner(config)
+    if config['algorithm'] == 'clv':
+        runner = CLVRunner(config)
+    else: 
+        runner = MainRunner(config)
     runner.run()
 
 

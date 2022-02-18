@@ -4,3 +4,6 @@
 [submodule "bmaml"]
 	path = bmaml
 	url = https://github.com/ju-leon/bmaml.git
+[submodule "metalearning_models"]
+	path = metalearning_models
+	url = https://github.com/michaelvolpp/metalearning_models
