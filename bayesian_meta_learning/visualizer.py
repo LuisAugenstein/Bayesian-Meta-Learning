@@ -48,12 +48,17 @@ def plot_task_results(caption, epoch, algo, task_dataloader, config):
     x_test, y_test = task_dataloader.dataset.denormalize(x=x_test, y=y_test)
     x_train, y_train = task_dataloader.dataset.denormalize(x=x_train, y=y_train)
     # create plotting data
+    plotting_data = generate_plotting_data(y_pred, y_test, x_test, y_train, x_train, num_visualization_tasks, config)
+    # plot the plotting data
+    generate_plots(caption, epoch, plotting_data, config)
+
+def generate_plotting_data(y_pred, y_test, x_test, y_train, x_train, num_visualization_tasks, config):
     plotting_data = [None] * num_visualization_tasks
     for task_index in range(num_visualization_tasks):
         R = config['y_plotting_resolution']
         S = y_pred.shape[1]
         N = y_pred.shape[2]
-        y_combined = torch.concat([y_test[task_index], y_pred[task_index]])
+        y_combined = torch.cat([y_test[task_index], y_pred[task_index]])
         start, end = (torch.min(y_combined).data, torch.max(y_combined).data)
         y_resolution = torch.linspace(start, end, R)
         y_broadcasted = torch.broadcast_to(y_resolution, (1, N, R))
@@ -66,7 +71,7 @@ def plot_task_results(caption, epoch, algo, task_dataloader, config):
         # generate heat_map with density values at the discretized points
         noise_var = config['noise_stddev']**2
         heat_maps = torch.exp(-(y_broadcasted-y_p)**2/(
-            2*noise_var)) / np.sqrt(2*torch.pi*noise_var)
+            2*noise_var)) / np.sqrt(2*np.pi*noise_var)
         heat_map = torch.mean(heat_maps, axis=0)
         heat_map = heat_map[1:, 1:].T
         plotting_data[task_index] = {
@@ -78,9 +83,7 @@ def plot_task_results(caption, epoch, algo, task_dataloader, config):
             'heat_map': heat_map.cpu().detach().numpy(),
             'y_resolution': y_resolution.cpu().detach().numpy(),
         }
-    # plot the plotting data
-    _generate_plots(caption, epoch, plotting_data, config)
-
+    return plotting_data
 
 def _predict_all_tasks(n_tasks: int, algo, model, task_dataloader, config: dict) -> Tuple[Tensor, Tensor, Tensor, Tensor, Tensor]:
     S = 1 if config['algorithm'] == 'maml' else config['num_models']
@@ -151,7 +154,7 @@ def _generate_task_initially_plots(caption, plotting_data, config):
     _save_plot(caption=caption, index="", config=config)
 
 
-def _generate_plots(caption, epoch, plotting_data, config):
+def generate_plots(caption, epoch, plotting_data, config):
     fig, axs = plt.subplots(2, len(plotting_data), squeeze=False)
     # plot the data
     for i, data in enumerate(plotting_data):
@@ -210,7 +213,7 @@ def _base_plot(data, ax):
             linewidth=1, linestyle='-')
     # plot samples
     ax.scatter(x=data['x_train'], y=data['y_train'],
-               s=40, marker='^', color='C3', zorder=2, alpha=0.75)
+               s=30, marker='^', color='C3', zorder=2, alpha=0.75)
     # additional information
     ax.set_xlabel('x')
     ax.set_ylabel('y')

@@ -12,7 +12,7 @@ def calculate_loss_metrics(algo, test_dataloader: DataLoader, config: dict) -> T
     y_pred, y_test = _predict_all_tasks(algo, model, test_dataloader, config)
     _, y_pred = test_dataloader.dataset.denormalize(y=y_pred)
     _, y_test = test_dataloader.dataset.denormalize(y=y_test)
-    nlml = _calculate_neg_log_marginal_likelihood(
+    nlml = calculate_neg_log_marginal_likelihood(
         y_pred, y_test, torch.tensor(config['noise_stddev']))
     mse = torch.nn.MSELoss()
     y_test = torch.broadcast_to(y_test, y_pred.shape)
@@ -20,7 +20,7 @@ def calculate_loss_metrics(algo, test_dataloader: DataLoader, config: dict) -> T
     return nlml, mse_loss
 
 
-def _calculate_neg_log_marginal_likelihood(y_pred: torch.Tensor, y_test: torch.Tensor, noise_stddev: torch.Tensor) -> float:
+def calculate_neg_log_marginal_likelihood(y_pred: torch.Tensor, y_test: torch.Tensor, noise_stddev: torch.Tensor) -> float:
     T = y_pred.shape[0]  # num tasks
     S = y_pred.shape[1]  # num model samples
     N = y_pred.shape[2]  # num datapoints
