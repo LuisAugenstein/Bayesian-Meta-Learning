@@ -59,7 +59,7 @@ class CLVRunner():
         settings["loss_kwargs"]["n_marg"] = self.config['num_models']
 
         # construct the model architecture with the updated settings
-        self.algo.initialize_new_model(seed=1234, settings=settings)
+        self.algo.initialize_new_model(seed=self.config['seed'], settings=settings)
 
         # train and save the model
         self.algo.meta_train(benchmark_meta=bm_meta,
@@ -100,9 +100,6 @@ class CLVRunner():
         # reshape to [n_tasks, n_samples, n_datapoints_per_task]
         y_pred = y_pred.squeeze()
         y_test = y_test.reshape((bm_test.n_task, 1, bm_test.n_datapoints_per_task))
-
-        # compare different samples from task 0 predictions
-        y_predictions = [y_pred[0, 0, :], y_pred[0, 1, :], y_pred[0, 2, :], y_pred[0, 3, :]]
 
         # calculate losses
         self.calculate_losses(y_pred, y_test)
