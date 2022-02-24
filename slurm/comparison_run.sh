@@ -3,8 +3,10 @@
 benchmark=Sinusoid1D
 k_shot=5
 num_episodes_per_epoch=100 #only for smoke test. for real test use 60000
+seed=123
 
 sbatch slurm/start_job.sh   algorithm=maml \
+                            seed=$seed \
 				            num_epochs=10 \
 				            num_episodes_per_epoch=$num_episodes_per_epoch \
 				            epochs_to_save=1 \
@@ -20,8 +22,10 @@ sbatch slurm/start_job.sh   algorithm=maml \
 				            hidden_size=40 \
 				            num_episodes=4 \
 				            num_inner_updates=5 \
+                            KL_weight=0
 
 sbatch slurm/start_job.sh   algorithm=platipus \
+                            seed=$seed \
                             num_epochs=10 \
                             num_episodes_per_epoch=$num_episodes_per_epoch \
                             epochs_to_save=1 \
@@ -40,6 +44,7 @@ sbatch slurm/start_job.sh   algorithm=platipus \
                             KL_weight=0.01
 
 sbatch slurm/start_job.sh   algorithm=bmaml \
+                            seed=$seed \
                             num_epochs=10 \
                             num_episodes_per_epoch=$num_episodes_per_epoch \
                             epochs_to_save=1 \
@@ -55,8 +60,10 @@ sbatch slurm/start_job.sh   algorithm=bmaml \
                             hidden_size=40 \
                             num_episodes=4 \
                             num_inner_updates=5 \
+                            KL_weight=0
 
 sbatch slurm/start_job.sh   algorithm=baseline \
+                            seed=$seed \
                             num_epochs=10 \
                             num_episodes_per_epoch=$num_episodes_per_epoch \
                             epochs_to_save=1 \
@@ -72,15 +79,25 @@ sbatch slurm/start_job.sh   algorithm=baseline \
                             hidden_size=40 \
                             num_episodes=4 \
                             num_inner_updates=5 \
+                            KL_weight=0
 
 sbatch slurm/start_job.sh   algorithm=clv \
+                            seed=$seed \
                             num_epochs=10 \
                             num_episodes_per_epoch=$num_episodes_per_epoch \
+                            epochs_to_save=0 \
                             benchmark=$benchmark \
                             num_models=10 \
                             k_shot=$k_shot \
                             num_points_per_train_task=50 \
+                            inner_lr=0 \
+                            meta_lr=0 \
                             minibatch=25 \
                             noise_stddev=0.1 \
+                            num_hidden=0 \
+                            hidden_size=0 \
+                            num_episodes=0 \
+                            num_inner_updates=0 \
+                            KL_weight=0
 
 
