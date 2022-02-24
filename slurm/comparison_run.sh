@@ -2,10 +2,11 @@
 
 benchmark=Sinusoid1D
 k_shot=5
+num_episodes_per_epoch=100 #only for smoke test. for real test use 60000
 
 sbatch slurm/start_job.sh   algorithm=maml \
 				            num_epochs=10 \
-				            num_episodes_per_epoch=60000 \
+				            num_episodes_per_epoch=$num_episodes_per_epoch \
 				            epochs_to_save=1 \
 				            benchmark=$benchmark \
 				            num_models=1 \
@@ -22,7 +23,7 @@ sbatch slurm/start_job.sh   algorithm=maml \
 
 sbatch slurm/start_job.sh   algorithm=platipus \
                             num_epochs=10 \
-                            num_episodes_per_epoch=60000 \
+                            num_episodes_per_epoch=$num_episodes_per_epoch \
                             epochs_to_save=1 \
                             benchmark=$benchmark \
                             num_models=10 \
@@ -40,7 +41,7 @@ sbatch slurm/start_job.sh   algorithm=platipus \
 
 sbatch slurm/start_job.sh   algorithm=bmaml \
                             num_epochs=10 \
-                            num_episodes_per_epoch=60000 \
+                            num_episodes_per_epoch=$num_episodes_per_epoch \
                             epochs_to_save=1 \
                             benchmark=$benchmark \
                             num_models=10 \
@@ -57,7 +58,7 @@ sbatch slurm/start_job.sh   algorithm=bmaml \
 
 sbatch slurm/start_job.sh   algorithm=baseline \
                             num_epochs=10 \
-                            num_episodes_per_epoch=60000 \
+                            num_episodes_per_epoch=$num_episodes_per_epoch \
                             epochs_to_save=1 \
                             benchmark=$benchmark \
                             num_models=1 \
@@ -74,7 +75,7 @@ sbatch slurm/start_job.sh   algorithm=baseline \
 
 sbatch slurm/start_job.sh   algorithm=clv \
                             num_epochs=10 \
-                            num_episodes_per_epoch=60000 \
+                            num_episodes_per_epoch=$num_episodes_per_epoch \
                             benchmark=$benchmark \
                             num_models=10 \
                             k_shot=$k_shot \
