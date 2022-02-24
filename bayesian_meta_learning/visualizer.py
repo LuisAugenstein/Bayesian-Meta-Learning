@@ -9,18 +9,20 @@ from typing import Tuple
 from torch.utils.data.dataloader import DataLoader
 import seaborn
 
+
 def plot_tasks_initially(caption, algo, task_dataloader: DataLoader, config):
     if task_dataloader.dataset.n_tasks == 0:
         return
     model = model = algo.load_model(
         resume_epoch=0.1, hyper_net_class=algo.hyper_net_class, eps_dataloader=task_dataloader)
     num_visualization_tasks = np.min([task_dataloader.dataset.n_tasks, 20])
-    y_pred, y_test, x_test, y_train, x_train = _predict_all_tasks(num_visualization_tasks, 
-        algo, model, task_dataloader, config)
+    y_pred, y_test, x_test, y_train, x_train = _predict_all_tasks(num_visualization_tasks,
+                                                                  algo, model, task_dataloader, config)
     # denormalize data
     _, y_pred = task_dataloader.dataset.denormalize(y=y_pred)
     x_test, y_test = task_dataloader.dataset.denormalize(x=x_test, y=y_test)
-    x_train, y_train = task_dataloader.dataset.denormalize(x=x_train, y=y_train)
+    x_train, y_train = task_dataloader.dataset.denormalize(
+        x=x_train, y=y_train)
     # generate plotting data
     plotting_data = [None] * num_visualization_tasks
     for task_index in range(num_visualization_tasks):
@@ -41,16 +43,34 @@ def plot_task_results(caption, epoch, algo, task_dataloader, config):
         resume_epoch=epoch, hyper_net_class=algo.hyper_net_class, eps_dataloader=task_dataloader)
     num_visualization_tasks = np.min(
         [config['num_visualization_tasks'], task_dataloader.dataset.n_tasks])
-    y_pred, y_test, x_test, y_train, x_train = _predict_all_tasks(num_visualization_tasks,
-        algo, model, task_dataloader, config)
+    num_tasks_to_plot = task_dataloader.dataset.n_tasks - \
+        (task_dataloader.dataset.n_tasks %
+         num_visualization_tasks) if caption == 'Testing' else num_visualization_tasks
+    y_pred, y_test, x_test, y_train, x_train = _predict_all_tasks(num_tasks_to_plot,
+                                                                  algo, model, task_dataloader, config)
     # denormalize data
     _, y_pred = task_dataloader.dataset.denormalize(y=y_pred)
     x_test, y_test = task_dataloader.dataset.denormalize(x=x_test, y=y_test)
-    x_train, y_train = task_dataloader.dataset.denormalize(x=x_train, y=y_train)
+    x_train, y_train = task_dataloader.dataset.denormalize(
+        x=x_train, y=y_train)
     # create plotting data
-    plotting_data = generate_plotting_data(y_pred, y_test, x_test, y_train, x_train, num_visualization_tasks, config)
-    # plot the plotting data
-    generate_plots(caption, epoch, plotting_data, config)
+    if(caption == 'Testing'):
+        for i in range(0, num_tasks_to_plot, num_visualization_tasks):
+            plotting_data = generate_plotting_data(
+                y_pred[i:i+num_visualization_tasks],
+                y_test[i:i+num_visualization_tasks],
+                x_test[i:i+num_visualization_tasks],
+                y_train[i:i+num_visualization_tasks],
+                x_train[i:i+num_visualization_tasks], num_visualization_tasks, config)
+            # plot the plotting data
+            generate_plots(
+                f"{caption}_{i // num_visualization_tasks}", epoch, plotting_data, config)
+    else:
+        plotting_data = generate_plotting_data(
+            y_pred, y_test, x_test, y_train, x_train, num_visualization_tasks, config)
+        # plot the plotting data
+        generate_plots(caption, epoch, plotting_data, config)
+
 
 def generate_plotting_data(y_pred, y_test, x_test, y_train, x_train, num_visualization_tasks, config):
     plotting_data = [None] * num_visualization_tasks
@@ -84,6 +104,7 @@ def generate_plotting_data(y_pred, y_test, x_test, y_train, x_train, num_visuali
             'y_resolution': y_resolution.cpu().detach().numpy(),
         }
     return plotting_data
+
 
 def _predict_all_tasks(n_tasks: int, algo, model, task_dataloader, config: dict) -> Tuple[Tensor, Tensor, Tensor, Tensor, Tensor]:
     S = 1 if config['algorithm'] == 'maml' else config['num_models']
@@ -155,7 +176,8 @@ def _generate_task_initially_plots(caption, plotting_data, config):
 
 
 def generate_plots(caption, epoch, plotting_data, config):
-    fig, axs = plt.subplots(1, len(plotting_data), squeeze=False, figsize=(12, 3))
+    fig, axs = plt.subplots(1, len(plotting_data),
+                            squeeze=False, figsize=(12, 3))
     # plot the data
     for i, data in enumerate(plotting_data):
         _plot_distribution(data, axs[0, i], fig)
@@ -163,12 +185,13 @@ def generate_plots(caption, epoch, plotting_data, config):
     # add cosmetics
     num_models = 1 if config['algorithm'] == 'maml' else config['num_models']
 
-    #fig.set_figwidth(12)
+    # fig.set_figwidth(12)
     plt.tight_layout()
     # save the plot
     _save_plot(caption+"_nlml", index=f"Epoch_{epoch}", config=config)
 
-    fig, axs = plt.subplots(1, len(plotting_data), squeeze=False, figsize=(12, 3))
+    fig, axs = plt.subplots(1, len(plotting_data),
+                            squeeze=False, figsize=(12, 3))
     # plot the data
     for i, data in enumerate(plotting_data):
         #_plot_distribution(data, axs[0, i], fig)
@@ -176,7 +199,7 @@ def generate_plots(caption, epoch, plotting_data, config):
     # add cosmetics
     num_models = 1 if config['algorithm'] == 'maml' else config['num_models']
 
-    #fig.set_figwidth(12)
+    # fig.set_figwidth(12)
     plt.tight_layout()
     # save the plot
     _save_plot(caption+"_plot", index=f"Epoch_{epoch}", config=config)
@@ -205,10 +228,10 @@ def _plot_distribution(data, ax, fig):
     # plot posterior predictive distribution
     max_heat = np.max(data['heat_map'])
     min_heat = np.min(data['heat_map'])
-    c = ax.pcolormesh(data['x_test'], 
+    c = ax.pcolormesh(data['x_test'],
                       data['y_resolution'],
                       data['heat_map'],
-                      vmin=min_heat, 
+                      vmin=min_heat,
                       vmax=max_heat,
                       cmap="BuPu"
                       )
