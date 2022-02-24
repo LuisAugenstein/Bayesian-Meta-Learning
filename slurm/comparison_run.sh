@@ -96,7 +96,7 @@ sbatch slurm/start_job.sh   algorithm=clv \
                             noise_stddev=0.1 \
                             num_hidden=0 \
                             hidden_size=0 \
-                            num_episodes=0 \
+                            num_episodes=4 \
                             num_inner_updates=0 \
                             KL_weight=0
 
