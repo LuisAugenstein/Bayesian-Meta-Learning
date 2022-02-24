@@ -78,15 +78,15 @@ def main():
                         help='Number of meta train tasks. should be a multiple of minibatch')
     parser.add_argument("--num_models", default=10, type=int,
                         help='number of models (phi) we sample from the posterior in the end for evaluation. irrelevant for maml')
-    parser.add_argument('--minibatch', default=20, type=int,
+    parser.add_argument('--minibatch', default=25, type=int,
                         help='Minibatch of episodes (tasks) to update meta-parameters')
     parser.add_argument('--minibatch_print', default=1, type=int,
                         help='number of minibatches between each validation plotting to wandb')
     parser.add_argument("--num_inner_updates", default=1, type=int,
                         help='number of SGD steps during adaptation')
-    parser.add_argument("--inner_lr", default=0.01, type=float)
-    parser.add_argument("--meta_lr", default=1e-3, type=float)
-    parser.add_argument("--KL_weight", default=1e-6, type=float)
+    parser.add_argument("--inner_lr", default=0.001, type=float)
+    parser.add_argument("--meta_lr", default=0.001, type=float)
+    parser.add_argument("--KL_weight", default=0.01, type=float)
     parser.add_argument('--num_episodes', type=int, default=4,
                         help='Number of validation tasks used for the MLBaseClass.evaluate() method')
     parser.add_argument("--resume_epoch", default=0,
@@ -128,8 +128,7 @@ def main():
     
     if config['num_test_tasks'] % config['minibatch'] != 0:
             print("!!!!!WARNING!!!!! num_test_tasks should be a multiple of minibatch.")
-            print("new Value for num_test_tasks is " +
-                  config['minibatch'])
+            print(f"new Value for num_test_tasks is {config['minibatch']}")
             config['num_test_tasks'] = config['minibatch']
 
     # create directory tree to store models and plots

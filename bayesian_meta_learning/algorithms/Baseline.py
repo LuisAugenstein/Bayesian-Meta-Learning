@@ -9,13 +9,6 @@ class Baseline(Maml):
     def __init__(self, config: dict) -> None:
         super().__init__(config=config)
 
-    def task_loss(self, task_data: dict, model: dict) -> torch.Tensor:
-        x = task_data[0].T
-        y = task_data[1].T
-        logits = self.prediction(
-            x=x, adapted_hyper_net=model['hyper_net'], model=model)
-        loss = self.config['loss_function'](input=logits, target=y)
-        return loss
 
     def train(self, train_dataloader: torch.utils.data.DataLoader, val_dataloader: typing.Optional[torch.utils.data.DataLoader]) -> None:
         #assert len(train_dataloader.dataset) == self.config['minibatch']
