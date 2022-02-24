@@ -105,7 +105,7 @@ def _predict_all_tasks(n_tasks: int, algo, model, task_dataloader, config: dict)
         y_test_t = y_test_t.to(config['device'])
 
         # use random seed to draw the k-shot samples equal for all evaluations
-        random.seed(config['seed'])
+        random.seed(config['seed_offset_test'])
         # generate training samples and move them to GPU (if there is a GPU)
         split_data = config['train_val_split_function'](
             eps_data=task_data, k_shot=config['k_shot'])

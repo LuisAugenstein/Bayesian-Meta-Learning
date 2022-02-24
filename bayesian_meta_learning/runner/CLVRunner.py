@@ -68,10 +68,10 @@ class CLVRunner():
         self.algo.save_model()
 
         # set seeds again after training
-        torch.manual_seed(self.config['seed'])
-        torch.cuda.manual_seed(self.config['seed'])
-        np.random.seed(self.config['seed'])
-        random.seed(self.config['seed'])
+        torch.manual_seed(self.config['seed_offset_test'])
+        torch.cuda.manual_seed(self.config['seed_offset_test'])
+        np.random.seed(self.config['seed_offset_test'])
+        random.seed(self.config['seed_offset_test'])
 
         # get test data
         x_test = torch.zeros(

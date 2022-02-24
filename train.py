@@ -31,7 +31,7 @@ def main():
 
     parser.add_argument("--num_points_per_train_task", default=512, type=int,
                         help='number of datapoints in each meta training task')
-    parser.add_argument("--num_test_tasks", default=20, type=int,
+    parser.add_argument("--num_test_tasks", default=100, type=int,
                         help='number of meta testing tasks')
     parser.add_argument("--num_points_per_test_task", default=512, type=int,
                         help='number of datapoints in each meta testing task')
