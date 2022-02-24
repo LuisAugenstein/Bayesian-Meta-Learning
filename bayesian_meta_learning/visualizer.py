@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 from torch import Tensor
 from typing import Tuple
 from torch.utils.data.dataloader import DataLoader
-
+import seaborn
 
 def plot_tasks_initially(caption, algo, task_dataloader: DataLoader, config):
     if task_dataloader.dataset.n_tasks == 0:
@@ -155,22 +155,31 @@ def _generate_task_initially_plots(caption, plotting_data, config):
 
 
 def generate_plots(caption, epoch, plotting_data, config):
-    fig, axs = plt.subplots(2, len(plotting_data), squeeze=False)
+    fig, axs = plt.subplots(1, len(plotting_data), squeeze=False, figsize=(12, 3))
     # plot the data
     for i, data in enumerate(plotting_data):
         _plot_distribution(data, axs[0, i], fig)
-        _plot_samples(data, axs[1, i])
+        #_plot_samples(data, axs[1, i])
     # add cosmetics
     num_models = 1 if config['algorithm'] == 'maml' else config['num_models']
-    fig.suptitle(
-        f"{config['algorithm'].upper()} - {config['benchmark']} - {epoch} epochs \n" +
-        f"k_shot={config['k_shot']}, noise_sttdev={config['noise_stddev']}, num_models={num_models}, \n" +
-        f"num_points_per_test_task={config['num_points_per_test_task']} ")
 
-    fig.set_figwidth(12)
+    #fig.set_figwidth(12)
     plt.tight_layout()
     # save the plot
-    _save_plot(caption, index=f"Epoch_{epoch}", config=config)
+    _save_plot(caption+"_nlml", index=f"Epoch_{epoch}", config=config)
+
+    fig, axs = plt.subplots(1, len(plotting_data), squeeze=False, figsize=(12, 3))
+    # plot the data
+    for i, data in enumerate(plotting_data):
+        #_plot_distribution(data, axs[0, i], fig)
+        _plot_samples(data, axs[0, i])
+    # add cosmetics
+    num_models = 1 if config['algorithm'] == 'maml' else config['num_models']
+
+    #fig.set_figwidth(12)
+    plt.tight_layout()
+    # save the plot
+    _save_plot(caption+"_plot", index=f"Epoch_{epoch}", config=config)
 
 # caption: main name of the file
 # index: Epoch_number
@@ -181,6 +190,10 @@ def _save_plot(caption: str, index: str, config: dict):
     if config['wandb']:
         wandb.log({caption: wandb.Image(plt, index)})
         print(f"stored to wandb: {filename}")
+
+        save_path = os.path.join(config['logdir_plots'], filename + ".pdf")
+        plt.savefig(save_path)
+        print(f"stored: {filename}")
     else:
         save_path = os.path.join(config['logdir_plots'], filename)
         plt.savefig(save_path)
@@ -188,13 +201,18 @@ def _save_plot(caption: str, index: str, config: dict):
 
 
 def _plot_distribution(data, ax, fig):
-    _base_plot(data, ax)
+    _base_plot(data, ax, color='black')
     # plot posterior predictive distribution
     max_heat = np.max(data['heat_map'])
     min_heat = np.min(data['heat_map'])
-    c = ax.pcolormesh(data['x_test'], data['y_resolution'],
-                      data['heat_map'], vmin=min_heat, vmax=max_heat)
-    fig.colorbar(c, ax=ax)
+    c = ax.pcolormesh(data['x_test'], 
+                      data['y_resolution'],
+                      data['heat_map'],
+                      vmin=min_heat, 
+                      vmax=max_heat,
+                      cmap="BuPu"
+                      )
+    #fig.colorbar(c, ax=ax)
 
 
 def _plot_samples(data, ax):
@@ -207,13 +225,13 @@ def _plot_samples(data, ax):
         ax.plot(data['x_test'], data['y_pred'][i, :], linestyle='--')
 
 
-def _base_plot(data, ax):
+def _base_plot(data, ax, color='black'):
     # plot ground truth
-    ax.plot(data['x_test'], data['y_test'], color='black',
+    ax.plot(data['x_test'], data['y_test'], color=color,
             linewidth=1, linestyle='-')
+    # additional information
+    ax.set_xlabel('input [x]')
+    ax.set_ylabel('output [y]')
     # plot samples
     ax.scatter(x=data['x_train'], y=data['y_train'],
-               s=30, marker='^', color='C3', zorder=2, alpha=0.75)
-    # additional information
-    ax.set_xlabel('x')
-    ax.set_ylabel('y')
+               s=30, marker='^', color='C3', zorder=9, alpha=0.75)
