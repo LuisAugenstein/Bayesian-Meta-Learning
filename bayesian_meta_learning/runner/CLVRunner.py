@@ -74,32 +74,37 @@ class CLVRunner():
         random.seed(self.config['seed_offset_test'])
 
         # get test data
-        x_test = torch.zeros(
+        x = torch.zeros(
             (bm_test.n_task, bm_test.n_datapoints_per_task, 1))
-        y_test = torch.zeros(
+        y = torch.zeros(
             (bm_test.n_task, bm_test.n_datapoints_per_task, 1))
         for i in range(bm_test.n_task):
             task = bm_test.get_task_by_index(i)
-            x = torch.tensor(task.x, dtype=torch.float32)
-            y = torch.tensor(task.y, dtype=torch.float32)
-            x_test[i], sort_indices = torch.sort(x, dim=0)
-            y_test[i] = y[sort_indices.squeeze()]
+            x_unsorted = torch.tensor(task.x, dtype=torch.float32)
+            y_unsorted = torch.tensor(task.y, dtype=torch.float32)
+            x[i], sort_indices = torch.sort(x_unsorted, dim=0)
+            y[i] = y_unsorted[sort_indices.squeeze()]
 
         # get context data
-        ids = [i for i in range(x_test.shape[1])]
+        ids = [i for i in range(x.shape[1])]
         x_ctx = torch.zeros(self.config['num_test_tasks'], self.config['k_shot'], 1)
         y_ctx = torch.zeros(self.config['num_test_tasks'], self.config['k_shot'], 1)
+        x_test = torch.zeros(self.config['num_test_tasks'], self.config['num_points_per_test_task'] - self.config['k_shot'], 1)
+        y_test = torch.zeros(self.config['num_test_tasks'], self.config['num_points_per_test_task'] - self.config['k_shot'], 1)
         for i in range(self.config['num_test_tasks']):
             k_ids=random.sample(population = ids, k = self.config['k_shot'])
-            x_ctx[i] = x_test[i, k_ids]
-            y_ctx[i] = y_test[i, k_ids]
+            t_ids = [t for t in ids if t not in k_ids]
+            x_ctx[i] = x[i, k_ids]
+            y_ctx[i] = y[i, k_ids]
+            x_test[i] = x[i, t_ids]
+            y_test[i] = y[i, t_ids]
 
         # adapt on context data and predict test data
         y_pred = self.predict(x_ctx, y_ctx, x_test)
 
         # reshape to [n_tasks, n_samples, n_datapoints_per_task]
         y_pred = y_pred.squeeze()
-        y_test = y_test.reshape((bm_test.n_task, 1, bm_test.n_datapoints_per_task))
+        y_test = y_test.reshape((bm_test.n_task, 1, bm_test.n_datapoints_per_task - self.config['k_shot']))
 
         # calculate losses
         self.calculate_losses(y_pred, y_test)
@@ -138,7 +143,7 @@ class CLVRunner():
     def predict_minibatch(self, x_ctx, y_ctx, x_test):
         # there is slef.algo.adapt() method but it takes a MetaLearningTask as input. but predict only works with a whole minibatch as input.
         # if I input only one task [n_datapoints, 1] into predict() it outputs [minibatch, n_datapoints, 1] anyways
-        y_pred = torch.zeros((self.config['minibatch'], self.config['num_models'], self.config['num_points_per_test_task'], 1))
+        y_pred = torch.zeros((self.config['minibatch'], self.config['num_models'], self.config['num_points_per_test_task'] - self.config['k_shot'], 1))
         for i in range(self.config['num_models']):
             self.algo.adapt(x_ctx, y_ctx)
             y_p, _ = self.algo.predict(x_test)
