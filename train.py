@@ -54,7 +54,7 @@ def main():
 
     parser.add_argument("--wandb", default=False, type=bool,
                         help="Specifies if logs should be written to WandB")
-    parser.add_argument("--num_visualization_tasks", default=6, type=int,
+    parser.add_argument("--num_visualization_tasks", default=4, type=int,
                         help='number of randomly chosen meta testing tasks that are used for visualization')
     parser.add_argument("--y_plotting_resolution", default=512, type=int,
                         help="number of discrete y-axis points to evaluate for visualization")

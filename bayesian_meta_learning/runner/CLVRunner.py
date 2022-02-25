@@ -80,24 +80,24 @@ class CLVRunner():
             (bm_test.n_task, bm_test.n_datapoints_per_task, 1))
         for i in range(bm_test.n_task):
             task = bm_test.get_task_by_index(i)
-            x_unsorted = torch.tensor(task.x, dtype=torch.float32)
-            y_unsorted = torch.tensor(task.y, dtype=torch.float32)
-            x[i], sort_indices = torch.sort(x_unsorted, dim=0)
-            y[i] = y_unsorted[sort_indices.squeeze()]
+            x[i]= torch.tensor(task.x, dtype=torch.float32)
+            y[i] = torch.tensor(task.y, dtype=torch.float32)
 
         # get context data
         ids = [i for i in range(x.shape[1])]
+        k_ids=random.sample(population = ids, k = self.config['k_shot'])
+        t_ids = [t for t in ids if t not in k_ids]
         x_ctx = torch.zeros(self.config['num_test_tasks'], self.config['k_shot'], 1)
         y_ctx = torch.zeros(self.config['num_test_tasks'], self.config['k_shot'], 1)
         x_test = torch.zeros(self.config['num_test_tasks'], self.config['num_points_per_test_task'] - self.config['k_shot'], 1)
         y_test = torch.zeros(self.config['num_test_tasks'], self.config['num_points_per_test_task'] - self.config['k_shot'], 1)
         for i in range(self.config['num_test_tasks']):
-            k_ids=random.sample(population = ids, k = self.config['k_shot'])
-            t_ids = [t for t in ids if t not in k_ids]
             x_ctx[i] = x[i, k_ids]
             y_ctx[i] = y[i, k_ids]
-            x_test[i] = x[i, t_ids]
-            y_test[i] = y[i, t_ids]
+            x_test_t = x[i, t_ids]
+            y_test_t = y[i, t_ids]
+            x_test[i], sort_indices = torch.sort(x_test_t, dim=0)
+            y_test[i] = y_test_t[sort_indices.squeeze()]
 
         # adapt on context data and predict test data
         y_pred = self.predict(x_ctx, y_ctx, x_test)
@@ -119,10 +119,22 @@ class CLVRunner():
         x_test = x_test.squeeze()[:, None, :]
         y_ctx = y_ctx.squeeze()[:, None, :]
         x_ctx = x_ctx.squeeze()[:, None, :]
-        plotting_data = visualizer.generate_plotting_data(
-            y_pred, y_test, x_test, y_ctx, x_ctx, num_visualization_tasks, self.config)
-        visualizer.generate_plots(
-            'Testing', self.config['num_epochs'], plotting_data, self.config)
+        
+        # plot the predictions
+        num_visualization_tasks = np.min(
+        [self.config['num_visualization_tasks'], bm_test.n_task])
+        num_tasks_to_plot = bm_test.n_task - \
+        (bm_test.n_task % num_visualization_tasks)
+        for i in range(0, num_tasks_to_plot, num_visualization_tasks):
+            plotting_data = visualizer.generate_plotting_data(
+                y_pred[i:i+num_visualization_tasks],
+                y_test[i:i+num_visualization_tasks],
+                x_test[i:i+num_visualization_tasks],
+                y_ctx[i:i+num_visualization_tasks],
+                x_ctx[i:i+num_visualization_tasks], num_visualization_tasks, self.config)
+            # plot the plotting data
+            visualizer.generate_plots(
+                f"Testing_{i // num_visualization_tasks}", self.config['num_epochs'], plotting_data, self.config)
 
 
     # x_ctx, y_ctx =   [n_tasks, k_shot, 1]
