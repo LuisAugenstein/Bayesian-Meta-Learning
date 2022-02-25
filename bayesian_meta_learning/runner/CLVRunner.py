@@ -58,6 +58,15 @@ class CLVRunner():
         settings["decoder_kwargs"]["arch"] = "separate_networks"
         settings["loss_kwargs"]["n_marg"] = self.config['num_models']
 
+        mlp_layers = []
+        for i in range(self.config['num_hidden']):
+            mlp_layers.append(self.config['hidden_size'])
+        
+        settings["encoder_kwargs"]["mlp_layers_r"] = mlp_layers
+        settings["encoder_kwargs"]["mlp_layers_cov_r"] = mlp_layers
+        settings["decoder_kwargs"]["mlp_layers_mu_y"] = mlp_layers
+        settings["decoder_kwargs"]["mlp_layers_std_y"] = mlp_layers
+
         # construct the model architecture with the updated settings
         self.algo.initialize_new_model(seed=self.config['seed'], settings=settings)
 
