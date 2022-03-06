@@ -14,19 +14,22 @@
                 "PYTHONWARNINGS": "ignore"
             },
             "args": [
-                "--algorithm", "clv", // maml, platipus, bmaml, baseline or bmaml_chaser
-                "--benchmark", "Sinusoid1D",
-                "--k_shot", "5",
+                "--algorithm", "bmaml", // maml, platipus, bmaml, baseline or bmaml_chaser
+                "--benchmark", "SinusoidAffine1D",
+                "--k_shot", "2",
                 "--num_episodes_per_epoch", "500", // equals number of training tasks
                 "--num_points_per_train_task", "50",
                 "--seed", "9999",
+                "--seed_offset_test", "7",
                 "--num_inner_updates", "1",
-                "--num_test_tasks", "10",
-                "--minibatch", "5",
-                "--num_models", "7",
-                "--num_epochs", "2",
+                "--num_inner_updates_testing", "5",
+                "--num_test_tasks", "4",
+                "--minibatch", "4",
+                "--num_models", "10",
+                "--num_epochs", "10",
                 "--reuse_models", "True",
                 "--num_hidden", "3",
+                "--num_visualization_tasks", "4",
                 "--hidden_size", "40",
                 "--nlml_testing_enabled", "True",
                 //"--KL_weight", "0.01"

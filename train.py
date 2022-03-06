@@ -163,7 +163,6 @@ def create_save_models_directory(config: dict):
                               config['algorithm'].lower(),
                               config['network_architecture'],
                               config['benchmark'],
-                              f"{config['k_shot']}-shot",
                               f"{config['num_models']}-models",
                               )
         config['logdir_plots'] = os.path.join(logdir, 'plots')
