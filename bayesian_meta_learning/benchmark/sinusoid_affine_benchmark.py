@@ -3,8 +3,8 @@ from metalearning_benchmarks.benchmarks.base_benchmark import MetaLearningBenchm
 from metalearning_benchmarks import Sinusoid, Affine1D
 
 class CustomAffine1D(Affine1D):
-    m_bounds = np.array([-2, 2])
-    b_bounds = np.array([-2.5, 2.5])
+    m_bounds = np.array([-3.0, 3.0])
+    b_bounds = np.array([-3.0, 3.0])
     param_bounds = np.array([m_bounds, b_bounds])
     x_bounds = np.array([[-5.0, 5.0]])
 
