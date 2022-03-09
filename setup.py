@@ -25,7 +25,7 @@ setup(
                       'setuptools-scm==6.3.2',
                       'six==1.16.0',
                       'tomli==1.2.2',
-                      'torch==1.10.0',
+                      'torch==1.9.1',
                       'torchvision==0.10.1',
                       'typing_extensions==4.0.1',
                       'kaleido>=0.2.1'
