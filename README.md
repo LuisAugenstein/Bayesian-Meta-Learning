@@ -1,4 +1,6 @@
+![Title Figure](figures/title.png)
 # MAML Algorithms for Meta Learning
+
 ## What is this ?
 This is a package to quickly run the following Meta-Learning algorithms:
 - MAML 
