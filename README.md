@@ -58,7 +58,8 @@ Then import the full Learner into your script
     config = Learner.get_default_config()
     config['algorithm'] = 'maml'
     config['benchmark'] = 'Sinusoid1D'
-    config['logdir_base'] = '.'
+    config['num_test_tasks'] = '4'
+    config['minibatch'] = '4'
 
     Learner.run(config)
 ```
