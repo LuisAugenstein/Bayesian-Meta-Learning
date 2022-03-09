@@ -1,16 +1,6 @@
-import torch
-import numpy as np
-import os
 import argparse
-import pathlib
-import uuid
-
-from bayesian_meta_learning.runner.MainRunner import MainRunner
-from bayesian_meta_learning.runner.CLVRunner import CLVRunner
 from bayesian_meta_learning.parameter_description import parameter_description
-from few_shot_meta_learning._utils import train_val_split_regression
-
-from learner import Learner
+from bayesian_meta_learning.learner import Learner
 
 # --------------------------------------------------
 # SETUP INPUT PARSER

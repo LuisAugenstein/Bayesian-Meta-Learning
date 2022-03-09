@@ -17,7 +17,7 @@ pip install -r requirements.txt
 
 # MAML Algorithms for Meta Learning
 ## What is this ?
-This is a package that enables to quickly run the following Meta-Learning algorithms:
+This is a package to quickly run the following Meta-Learning algorithms:
 - MAML 
 - PLATIPUS
 - BMAML
