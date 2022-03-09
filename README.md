@@ -48,5 +48,28 @@ Then import the Learner into your script
     Learner.run(config)
 ```
 
-## execute via bash script
-TODO: clean up slurm directory and describe what scripts can be used.
+## Comparison Runs
+
+The runs we compare in the final report were created using the script `slurm/comparison_run.sh`.
+
+This script requires a `slurm` Workload Manager to be installed.
+Make sure to change to the appropriate Conda environment before starting the jobs.
+
+At the time of testing, all jobs were run on CPU.
+To change to GPU execution, go to `slurm/start_job.sh` and change the required resources to GPU. If installed correctly, the GPU should be recognized automatically, so no further changes are necessary.
+
+To start the full comparison, run:
+```
+sh slurm/comparison_run.sh
+```
+
+Starting the full comparison requires significant compute power.
+With the current configuration, you can expect around 2000 CPU hours.
+
+
+## Acknowledgement
+
+This implementation depends heavily on [few_shot_meta_learning](https://github.com/cnguyen10/few_shot_meta_learning).
+If you do not need our comparison suite and only need to train meta learning algorithms, this repository might be more suitable.
+
+
