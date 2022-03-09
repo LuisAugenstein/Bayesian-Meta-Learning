@@ -5,103 +5,11 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Local Run",
-            "type": "python",
-            "request": "launch",
-            "program": "train.py",
-            "console": "integratedTerminal",
-            "env": {
-                "PYTHONWARNINGS": "ignore"
-            },
-            "args": [
-                "--algorithm", "bmaml", // maml, platipus, bmaml, baseline or bmaml_chaser
-                "--benchmark", "SinusoidAffine1D",
-                "--k_shot", "2",
-                "--num_episodes_per_epoch", "500", // equals number of training tasks
-                "--num_points_per_train_task", "50",
-                "--seed", "9999",
-                "--seed_offset_test", "7",
-                "--num_inner_updates", "1",
-                "--num_inner_updates_testing", "5",
-                "--num_test_tasks", "4",
-                "--minibatch", "4",
-                "--num_models", "10",
-                "--num_epochs", "10",
-                "--reuse_models", "True",
-                "--num_hidden", "3",
-                "--num_visualization_tasks", "4",
-                "--hidden_size", "40",
-                "--nlml_testing_enabled", "True",
-                //"--KL_weight", "0.01"
-            ]
-        },
-        {
-            "name": "BMAML Chaser",
-            "type": "python",
-            "request": "launch",
-            "program": "train.py",
-            "console": "integratedTerminal",
-            "env": {
-                "PYTHONWARNINGS": "ignore"
-            },
-            "args": [
-                "--runner", "main_runner", // main_runner, nlml_runner
-                "--algorithm", "bmaml_chaser", // maml, platipus, bmaml, or baseline
-                "--num_episodes_per_epoch", "100",
-                "--num_models", "10",
-                "--k_shot", "10",
-                "--minibatch", "10",
-                "--num_hidden", "3",
-                "--num_episodes_per_epoch", "100",
-                "--inner_lr", "0.01",
-                "--meta_lr", "0.01",
-                "--num_train_tasks", "100",
-                "--num_validation_tasks", "100",
-                "--num_inner_updates", "1",
-                "--reuse_models", "False"
-            ]
-        },
-        //SANITY CHECKS (test trivial examples on which the results should be really good)
-        {
-            "name": "Adaptation Test",
-            "type": "python",
-            "request": "launch",
-            "program": "train.py",
-            "console": "integratedTerminal",
-            "env": {
-                "PYTHONWARNINGS": "ignore"
-            },
-            "args": [
-                // changeable parameters
-                "--algorithm", "maml", // maml, platipus, bmaml, or baseline
-                "--num_inner_updates", "10000", // 0 for initial model, 10000 for many adaptations
-                "--num_episodes_per_epoch", "1",
-                // don't change parameters below
-                "--k_shot", "80",
-                "--num_episodes", "0",
-                "--num_test_tasks", "0",
-                "--num_epochs", "0",
-            ]
-        },
-        {
-            "name": "One Task Test",
-            "type": "python",
-            "request": "launch",
-            "program": "train.py",
-            "console": "integratedTerminal",
-            "env": {
-                "PYTHONWARNINGS": "ignore"
-            },
-            "args": [
-                "--algorithm", "maml",
-                "--minibatch", "1",
-                "--minibatch_validation", "0",
-                "--minibatch_test", "0",
-                "--num_epochs", "5000",
-            ],
-        },
-        // Quick Run for each algorithm to check if it throws errors
-        {
+            /* 
+                fast training run that should only take a few seconds. 
+                You can view the results in the saved_models directory will be created during the run.
+                Increasing num_episodes_per_epoch or num_epochs will lead to longer training times and better results
+            */
             "name": "Quick Run",
             "type": "python",
             "request": "launch",
@@ -111,12 +19,82 @@
                 "PYTHONWARNINGS": "ignore"
             },
             "args": [
-                "--algorithm", "platipus",
-                "--minibatch", "2",
-                "--minibatch_validation", "1",
-                "--minibatch_test", "2",
-                "--num_epochs", "50",
-                "--epochs_to_store", "10"
+                "--algorithm", "maml", // maml, platipus, bmaml, baseline or bmaml_chaser
+                "--benchmark", "Sinusoid1D", // Sinusoid1D, Affine1D, Quadratic1D, SinusoidAffine1D
+                "--k_shot", "5",
+                "--num_episodes_per_epoch", "10", // equals number of training tasks
+                "--num_test_tasks", "4",
+                "--num_epochs", "10",
+            ]
+        },
+        {
+            /*
+                a full run that can take up to several hours depending on your machine
+            */
+            "name": "Full Run",
+            "type": "python",
+            "request": "launch",
+            "program": "train.py",
+            "console": "integratedTerminal",
+            "env": {
+                "PYTHONWARNINGS": "ignore"
+            },
+            "args": [
+                "--algorithm", "maml", // maml, platipus, bmaml, or baseline
+                "--benchmark", "Sinusoid1D", // Sinusoid1D, Affine1D, Quadratic1D, SinusoidAffine1D
+                "--k_shot", "5",
+                "--num_inner_updates", "5",
+                "--num_episodes_per_epoch", "60000",
+                "--num_test_tasks", "100",
+                "--num_epochs", "10",
+                "--num_hidden", "3",
+            ]
+        },
+        {
+            /*
+                Sanity Check for the adaptation step
+                Test if the algorithms can overfit to a single training task,
+                if we give it enough training data and inner update steps.
+            */
+            "name": "Adaptation Sanity Check",
+            "type": "python",
+            "request": "launch",
+            "program": "train.py",
+            "console": "integratedTerminal",
+            "env": {
+                "PYTHONWARNINGS": "ignore"
+            },
+            "args": [
+                "--algorithm", "maml", // maml, platipus, bmaml, or baseline
+                "--num_inner_updates_testing", "10000", // 0 for initial model, 10000 for many adaptations
+                "--num_episodes_per_epoch", "1",
+                "--k_shot", "300",
+                "--num_points_per_train_task", "512",
+                "--num_test_tasks", "1",
+                "--num_epochs", "1",
+                "--num_episodes", "0",
+            ]
+        },
+        {
+            /*
+                Sanity check for the meta-update step.
+                Test if meta-training can overfit to only one training task.
+                For this sanity check only the training plots are relevant.
+            */
+            "name": "Meta-Update Sanity Check",
+            "type": "python",
+            "request": "launch",
+            "program": "train.py",
+            "console": "integratedTerminal",
+            "env": {
+                "PYTHONWARNINGS": "ignore"
+            },
+            "args": [
+                "--algorithm", "maml",
+                "--num_episodes_per_epoch", "1",
+                "--num_epochs", "3000",
+                "--minibatch", "1",
+                "--num_test_tasks", "1",
             ],
         }
     ]

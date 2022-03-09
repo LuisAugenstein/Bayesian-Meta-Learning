@@ -29,7 +29,7 @@ def main():
     parser.add_argument("--seed_offset_test", default=12345, type=int,
                         help='data generation seed for the meta testing task')
 
-    parser.add_argument("--num_points_per_train_task", default=512, type=int,
+    parser.add_argument("--num_points_per_train_task", default=50, type=int,
                         help='number of datapoints in each meta training task')
     parser.add_argument("--num_test_tasks", default=100, type=int,
                         help='number of meta testing tasks')
@@ -46,7 +46,7 @@ def main():
 
     parser.add_argument("--num_inner_updates_testing", default=5, type=int,
                         help="number of inner update steps used during testing")
-    parser.add_argument("--nlml_testing_enabled", default=False, type=bool,
+    parser.add_argument("--nlml_testing_enabled", default=True, type=bool,
                         help="whether to calculate neg log marginal likelihood or not.")
     parser.add_argument("--reuse_models", default=False, type=bool,
                         help='Specifies if a saved state should be used if found or if the model should be trained from start.')
@@ -72,9 +72,9 @@ def main():
     parser.add_argument("--algorithm", default='maml',
                         help='possible values are maml, platipus, bmaml, baseline and bmaml_chaser and clv')
     parser.add_argument("--network_architecture", default="FcNet")
-    parser.add_argument("--num_epochs", default=5, type=int,
+    parser.add_argument("--num_epochs", default=10, type=int,
                         help='number of training epochs. one epoch corresponds to one meta update for theta. model is stored all 500 epochs')
-    parser.add_argument('--num_episodes_per_epoch', default=20, type=int,
+    parser.add_argument('--num_episodes_per_epoch', default=100, type=int,
                         help='Number of meta train tasks. should be a multiple of minibatch')
     parser.add_argument("--num_models", default=10, type=int,
                         help='number of models (phi) we sample from the posterior in the end for evaluation. irrelevant for maml')
