@@ -8,7 +8,7 @@ setup(
     author='Leon Jungemeyer and Luis Augenstein',
     author_email='leon.jungemeyer@student.kit.edu, luis.augenstein@web.de',
     license='MIT',
-    packages=["bayesian_meta_learning", "bmaml", "few_shot_meta_learning"],
+    packages=["bayesian_meta_learning", "bayesian_meta_learning.algorithms", "bayesian_meta_learning.benchmark", "bayesian_meta_learning.runner"  "bmaml", "few_shot_meta_learning"],
     install_requires=['cycler==0.11.0',
                       'fonttools==4.28.3',
                       'higher==0.2.1',

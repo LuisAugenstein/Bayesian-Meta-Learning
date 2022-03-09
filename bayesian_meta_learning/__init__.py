@@ -1,3 +1,1 @@
-import algorithms
-import benchmark
-import runner
+from bayesian_meta_learning.learner import Learner
