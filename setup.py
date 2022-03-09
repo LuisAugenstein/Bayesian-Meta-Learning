@@ -8,8 +8,7 @@ setup(
     author_email='leon.jungemeyer@student.kit.edu, luis.augenstein@web.de',
     license='MIT',
     packages=['bayesian_meta_learning'],
-    install_requires=['certifi==2021.10.8',
-                      'cycler==0.11.0',
+    install_requires=['cycler==0.11.0',
                       'fonttools==4.28.3',
                       'higher==0.2.1',
                       'kiwisolver==1.3.2',
@@ -29,7 +28,6 @@ setup(
                       'torch==1.10.0',
                       'torchvision==0.11.1',
                       'typing_extensions==4.0.1',
-                      'wincertstore==0.2',
                       'kaleido>=0.2.1'
                       ],
 )
