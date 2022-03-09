@@ -7,6 +7,8 @@ from bayesian_meta_learning.runner.MainRunner import MainRunner
 from bayesian_meta_learning.runner.CLVRunner import CLVRunner
 from few_shot_meta_learning._utils import train_val_split_regression
 
+print("Hallo")
+
 
 class Learner():
 
