@@ -1,4 +1,5 @@
-from setuptools import setup
+from setuptools import setup, find_packages
+
 setup(
     name='bayesian_meta_learning',
     version='0.1.0',
@@ -7,7 +8,7 @@ setup(
     author='Leon Jungemeyer and Luis Augenstein',
     author_email='leon.jungemeyer@student.kit.edu, luis.augenstein@web.de',
     license='MIT',
-    packages=['bayesian_meta_learning'],
+    packages=find_packages(exclude=["bmaml_chaser_models", "slurm", ".vscode"]),
     install_requires=['cycler==0.11.0',
                       'fonttools==4.28.3',
                       'higher==0.2.1',
