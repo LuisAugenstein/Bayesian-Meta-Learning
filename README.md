@@ -32,20 +32,20 @@ We defined some default scenarios in the `.vscode/launch.json` you can simply ru
 ## import into another project
 Install this package in your own project using pip
 ```
-    pip install git+https://github.com/LuisAugenstein/Bayesian-Meta-Learning
+pip install git+https://github.com/LuisAugenstein/Bayesian-Meta-Learning
 ```
 Then import the Learner into your script
 ```
-    from bayesian_meta_learning import Learner
+from bayesian_meta_learning import Learner
 
-    config = Learner.get_default_config()
-    config['algorithm'] = 'maml'
-    config['benchmark'] = 'Sinusoid1D'
-    config['num_epochs'] = 10
-    config['num_test_tasks'] = 4
-    config['minibatch'] = 4
+config = Learner.get_default_config()
+config['algorithm'] = 'maml'
+config['benchmark'] = 'Sinusoid1D'
+config['num_epochs'] = 10
+config['num_test_tasks'] = 4
+config['minibatch'] = 4
 
-    Learner.run(config)
+Learner.run(config)
 ```
 
 ## Comparison Runs
