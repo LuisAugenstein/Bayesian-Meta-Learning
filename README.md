@@ -1,20 +1,3 @@
-# Installation
-
-## First time setup
-
-````
-# initialize few_shot_meta_learning submodule
-git submodule update --init
-
-# Create a new conda env:
-conda create  --name meta_learning
-conda activate meta_learning
-conda install pip
-
-# Install requirements
-pip install -r requirements.txt 
-````
-
 # MAML Algorithms for Meta Learning
 ## What is this ?
 This is a package to quickly run the following Meta-Learning algorithms:
@@ -49,11 +32,11 @@ We defined some default scenarios in the `.vscode/launch.json` you can simply ru
 ## import into another project
 Install this package in your own project using pip
 ```
-    pip install git+https://metalearning.git
+    pip install git+https://github.com/LuisAugenstein/Bayesian-Meta-Learning
 ```
-Then import the full Learner into your script
+Then import the Learner into your script
 ```
-    from metalearning_maml.learner import Learner
+    from bayesian_meta_learning import Learner
 
     config = Learner.get_default_config()
     config['algorithm'] = 'maml'
