@@ -8,7 +8,7 @@ setup(
     author='Leon Jungemeyer and Luis Augenstein',
     author_email='leon.jungemeyer@student.kit.edu, luis.augenstein@web.de',
     license='MIT',
-    packages=find_packages(exclude=["bmaml_chaser_models", "slurm", ".vscode"]),
+    packages=["bayesian_meta_learning", "bmaml", "few_shot_meta_learning"],
     install_requires=['cycler==0.11.0',
                       'fonttools==4.28.3',
                       'higher==0.2.1',
