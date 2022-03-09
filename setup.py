@@ -16,7 +16,7 @@ setup(
                       'plotly>=5.4.0',
                       'metalearning-benchmarks@git+https://github.com/michaelvolpp/metalearning_benchmarks.git@3005e0125ad8c57d112f693241cb2b052c3b249c',
                       'mtbnn@git+https://github.com/michaelvolpp/mtbnn.git@00cabf80bb0173233774501c083ec08ea30b95f6',
-                      'metalearning_models@git+https://github.com/michaelvolpp/metalearning_models.git@clv_adapt_api_change'
+                      'metalearning_models@git+https://github.com/michaelvolpp/metalearning_models.git@clv_adapt_api_change',
                       'numpy==1.21.4',
                       'packaging==21.3',
                       'Pillow==8.4.0',
