@@ -5,19 +5,23 @@ from torch import Tensor
 from typing import Tuple
 import numpy as np
 
+from few_shot_meta_learning.MLBaseClass import MLBaseClass
 
 def calculate_loss_metrics(algo, test_dataloader: DataLoader, config: dict) -> Tuple[float, float]:
-    model = algo.load_model(
-        resume_epoch=config["num_epochs"], hyper_net_class=algo.hyper_net_class, eps_dataloader=test_dataloader)
-    y_pred, y_test = _predict_all_tasks(algo, model, test_dataloader, config)
+    y_pred, y_test = _predict_all_tasks(algo, test_dataloader, config)
     _, y_pred = test_dataloader.dataset.denormalize(y=y_pred)
     _, y_test = test_dataloader.dataset.denormalize(y=y_test)
     nlml = calculate_neg_log_marginal_likelihood(
         y_pred, y_test, torch.tensor(config['noise_stddev']))
+    mse = calculate_mse(y_pred, y_test)
+    return nlml, mse
+   
+
+def calculate_mse(y_pred: torch.Tensor, y_test: torch.Tensor) -> float:
     mse = torch.nn.MSELoss()
     y_test = torch.broadcast_to(y_test, y_pred.shape)
     mse_loss = mse(y_pred, y_test).item()
-    return nlml, mse_loss
+    return mse_loss
 
 
 def calculate_neg_log_marginal_likelihood(y_pred: torch.Tensor, y_test: torch.Tensor, noise_stddev: torch.Tensor) -> float:
@@ -30,8 +34,9 @@ def calculate_neg_log_marginal_likelihood(y_pred: torch.Tensor, y_test: torch.Te
     nlml = torch.sum(nlml_per_task) / T
     return nlml.item()
 
-
-def _predict_all_tasks(algo, model, task_dataloader, config: dict) -> Tuple[Tensor, Tensor]:
+def _predict_all_tasks(algo, task_dataloader, config: dict) -> Tuple[Tensor, Tensor]:
+    model = algo.load_model(
+        resume_epoch=config["num_epochs"], hyper_net_class=algo.hyper_net_class, eps_dataloader=task_dataloader)
     S = 1 if config['algorithm'] == 'maml' else config['num_models']
     T = task_dataloader.dataset.n_tasks
     N = config['num_points_per_test_task'] - config['k_shot']

@@ -6,8 +6,6 @@ from metalearning_benchmarks.benchmarks.base_benchmark import MetaLearningBenchm
 """
     This Dataset is a wrapper for a benchmark (all tasks)
 """
-
-
 class BenchmarkDataset(torch.utils.data.Dataset):
     def __init__(self, benchmark: MetaLearningBenchmark, normalize_enabled:bool) -> None:
         super().__init__()

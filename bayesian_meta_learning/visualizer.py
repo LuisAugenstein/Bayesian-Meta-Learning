@@ -7,8 +7,6 @@ import matplotlib.pyplot as plt
 from torch import Tensor
 from typing import Tuple
 from torch.utils.data.dataloader import DataLoader
-import seaborn
-
 
 def plot_tasks_initially(caption, algo, task_dataloader: DataLoader, config):
     if task_dataloader.dataset.n_tasks == 0:

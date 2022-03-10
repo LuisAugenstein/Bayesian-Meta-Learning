@@ -1,6 +1,6 @@
 from bayesian_meta_learning import visualizer
 from metalearning_benchmarks.benchmarks.base_benchmark import MetaLearningTask
-from bayesian_meta_learning.model_tester import calculate_neg_log_marginal_likelihood
+from bayesian_meta_learning.model_tester import calculate_mse, calculate_neg_log_marginal_likelihood
 from bayesian_meta_learning.benchmark.benchmark_dataloader import create_benchmarks
 import wandb
 import numpy as np
@@ -115,8 +115,17 @@ class CLVRunner():
         y_pred = y_pred.squeeze()
         y_test = y_test.reshape((bm_test.n_task, 1, bm_test.n_datapoints_per_task - self.config['k_shot']))
 
-        # calculate losses
-        self.calculate_losses(y_pred, y_test)
+        # calculate loss metrics
+        nlml = calculate_neg_log_marginal_likelihood(y_pred, y_test, torch.tensor(self.config['noise_stddev']))
+        mse = calculate_mse(y_pred, y_test)
+        if(self.config['wandb']):
+            wandb.log({
+                'evaluation/run_id': 1,
+                'evaluation/nlml': nlml,
+                'evaluation/mse': mse
+            })
+        print(f"Test-NLML: {nlml}")
+        print(f"Test-MSE: {mse}")
 
         # visualize the test data
         print("Visualization is started.")
@@ -170,20 +179,3 @@ class CLVRunner():
             y_p, _ = self.algo.predict(x_test)
             y_pred[:, i, :, :] = torch.tensor(y_p)
         return y_pred
-
-    # y_pred = [n_tasks, n_samples, n_datapoints]
-    # y_test = [n_tasks, 1, n_datapoints]
-    def calculate_losses(self, y_pred, y_test):
-        nlml=calculate_neg_log_marginal_likelihood(
-            y_pred, y_test, torch.tensor(self.config['noise_stddev']))
-        mse = torch.nn.MSELoss()
-        y_test = torch.broadcast_to(y_test, y_pred.shape)
-        mse_loss = mse(y_pred, y_test).item()
-        if(self.config['wandb']):
-            wandb.log({
-                'evaluation/run_id': 1,
-                'evaluation/nlml': nlml,
-                'evaluation/mse': mse_loss
-            })
-        print(f"Test-NLML: {nlml}")
-        print(f"Test-MSE: {mse_loss}")
